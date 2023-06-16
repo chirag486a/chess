@@ -1,6 +1,6 @@
-import { positiveNegativeConversion, provideStep, givePieceInfo, pawnEatings, updatePieceInfo, deleteRowCol, containPiece, provideSpecial } from "../model/data.js";
+import { positiveNegativeConversion, provideStep, givePieceInfo, pawnEatings, updatePieceInfo, deleteRowCol, containPiece, provideSpecial, findKing } from "../model/data.js";
 import { move as send } from "../view/task/task.js";
-import { chessCheck } from "./check.js";
+import { pinnedCheck, defendKing, chessCheck } from "./check.js";
 
 
 const blocked = function ([gRow, gCol], [row, col]) {
@@ -36,7 +36,7 @@ const prepareKing = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
   const { step } = provideStep(pieceObj.name);
   const { upDown } = pieceObj;
-  const side = upDown 
+  const side = upDown;
   const extracting = Object.keys(step);
   const dArr = {};
   extracting.forEach(dir => {
@@ -48,7 +48,7 @@ const prepareKing = function ([row, col], check) {
 
     dArr[dir] = [];
     try {
-      
+
       if (!containPiece([curRow, curCol])) {
         dArr[dir] = [curRow, curCol];
       }
@@ -56,14 +56,14 @@ const prepareKing = function ([row, col], check) {
         dArr[dir] = [curRow, curCol];
       }
     } catch (err) {
-      return
+      return;
     }
   });
-  
-  if(check) return chessCheck(dArr, pieceObj.type);
+
+  if (check) return pinnedCheck(dArr, pieceObj.type);
   return dArr;
-  
-  
+
+
 };
 const pawnEats = function ([row, col]) {
   const { upDown } = givePieceInfo([row, col]);
@@ -87,7 +87,7 @@ const pawnEats = function ([row, col]) {
 
   return eat;
 };
-const preparePawn = function ([row, col]) {
+const preparePawn = function ([row, col], check) {
   const pawnData = givePieceInfo([row, col]);
   const { step } = provideStep(pawnData.name);
 
@@ -116,11 +116,9 @@ const preparePawn = function ([row, col]) {
     const sCol = side === 0 ? positiveNegativeConversion(special.doubleTop[1]) + col : special.doubleTop[1] + col;
 
     if (!containPiece([fRow, fCol]) && !containPiece([sRow, sCol]) && pawnData.moved === false) {
-
       obj = { ...obj, doubleTop: [sRow, sCol] };
 
     }
-
   } catch (err) {
     console.log("Special Move");
     console.error(err);
@@ -136,7 +134,7 @@ const preparePawn = function ([row, col]) {
     try {
       if (containPiece([gRow, gCol])) {
         if (!compareType([row, col], [gRow, gCol])) {
-          eat[eatDir] = [gRow, gCol];
+          eat[dir] = [gRow, gCol];
         }
       }
     } catch (err) {
@@ -145,10 +143,17 @@ const preparePawn = function ([row, col]) {
   });
 
   obj = { ...obj, ...eat };
+  if (!check) return obj;
+  // check for king check
+  const type = pawnData.type;
+  const king = findKing(type);
+  const chek = chessCheck(type);
+  console.log(chek);
   return obj;
+
 };
 
-const prepareKnight = function ([row, col]) {
+const prepareKnight = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
   const { side } = pieceObj;
   const { step } = provideStep(pieceObj.name);
@@ -173,85 +178,86 @@ const prepareKnight = function ([row, col]) {
       return;
     }
   });
+
+  if (!check) return dArr;
+  const type = pieceObj.type;
+  const chek = chessCheck(type);
+  console.log(chek);
+
+
   return dArr;
 
 };
-const moves = function ([row, col], name, side) {
+const moves = function ([row, col], name, side, check) {
   if (name === "pawn") {
-    const pawnMoves = preparePawn([row, col]);
+    const pawnMoves = preparePawn([row, col], check);
     return pawnMoves;
   }
 
 
   if (name === "king") {
-    const kingMoves = prepareKing([row, col], true);
+    const kingMoves = prepareKing([row, col], check);
 
-    
+
     return kingMoves;
   }
   if (name === "knight") {
-    const knightMoves = prepareKnight([row, col]);
+    const knightMoves = prepareKnight([row, col], check);
     return knightMoves;
   }
-  if (name === "queen" || name === "rook" || name === "bishop") {
-    let curRow = row;
-    let curCol = col;
-    const dArr = {};
-    const { direction } = provideStep(name);
-    const extracting = Object.keys(direction);
-    extracting.forEach(dir => {
-      let [mRow, mCol] = direction[dir];
-      mRow = side === 0 ? positiveNegativeConversion(mRow) : mRow;
-      mCol = side === 0 ? positiveNegativeConversion(mCol) : mCol;
-      dArr[dir] = [];
-      // Reinitialize
-      curRow = row;
-      curCol = col;
+  if (name === undefined) return {}
+  let curRow = row;
+  let curCol = col;
+  const dArr = {};
+  const { direction } = provideStep(name);
+  const extracting = Object.keys(direction);
+  extracting.forEach(dir => {
+    let [mRow, mCol] = direction[dir];
+    mRow = side === 0 ? positiveNegativeConversion(mRow) : mRow;
+    mCol = side === 0 ? positiveNegativeConversion(mCol) : mCol;
+    dArr[dir] = [];
+    // Reinitialize
+    curRow = row;
+    curCol = col;
 
-      curRow += mRow;
-      curCol += mCol;
-      while (true) {
-        try {
-          if (containPiece([curRow, curCol])) {
-            const trfa = compareType([curRow, curCol], [row, col]);
-            if (!trfa) {
-              dArr[dir].push([curRow, curCol]);
-              break;
-            }
+    curRow += mRow;
+    curCol += mCol;
+    while (true) {
+      try {
+        if (containPiece([curRow, curCol])) {
+          const trfa = compareType([curRow, curCol], [row, col]);
+          if (!trfa) {
+            dArr[dir].push([curRow, curCol]);
             break;
-          };
-          dArr[dir].push([curRow, curCol]);
-          curRow += mRow;
-          curCol += mCol;
-        } catch (err) {
+          }
           break;
-        }
+        };
+        dArr[dir].push([curRow, curCol]);
+        curRow += mRow;
+        curCol += mCol;
+      } catch (err) {
+        break;
       }
+    }
 
-    });
-    return dArr;
-  }
+  });
+  if (!check) return dArr;
+  const pieceObj = givePieceInfo([row, col])
+  const type = pieceObj.type;
+  const chek = chessCheck(type);
+  console.log(chek);
+  return dArr;
 };
 
 
 
 
 
-
-
-const kingEatables = function ([row, col]) {
-
-};
-
-const eatables = function ([row, col]) {
-
-
-};
-const possibleMove = function ([row, col]) {
+const possibleMove = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
   const pieceName = pieceObj.name;
   const side = pieceObj.upDown;
-  const step = moves([row, col], pieceName, side);
+  const step = moves([row, col], pieceName, side, check);
   return step;
 
 };

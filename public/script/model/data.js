@@ -157,13 +157,14 @@ const containPiece = function ([row, col]) {
 	}
 
 };
-const findOppKing = function ([row, col]) {
+const findKing = function (type) {
 
-	const pieceInfo = givePieceInfo([row, col]);
-
-	const type = pieceInfo.type;
-
-	const kingRowCol = grid.find(piece => (piece.type !== undefined) && (piece.type !== type) && (piece.name === "king"));
+	for (let i = 0; i <= 7; i++) {
+		for (let j = 0; j <= 7; j++) {
+			const pieceInFo = givePieceInfo([i, j])
+			if (pieceInFo.name === "king" && pieceInFo.type === type) return [i, j];
+		}
+	}
 
 
 
@@ -379,5 +380,6 @@ export {
 	updatePieceInfo,
 	deleteRowCol,
 	giveGrid,
-	provideSpecial
+	provideSpecial,
+	findKing
 };

@@ -8,13 +8,13 @@ import { retriveRowCol } from "../view/util/utility.js";
 import { moveOnOffLight, clickLight } from "../view/task/task.js";
 // control/movement
 import { move, possibleMove } from "./movement.js";
-import { chessCheck } from "./check.js";
+import { pinnedCheck } from "./check.js";
 // utility
 import { arrayConverter } from "./util.js";
 
 
 const light = function ([row, col]) {
-	const possibleMoves = possibleMove([row, col]);
+	const possibleMoves = possibleMove([row, col], true);
 	const m = arrayConverter(possibleMoves);
 	moveOnOffLight(m, true);
 	clickLight([row, col], true);
@@ -25,7 +25,7 @@ const unLight = function ([pRow, pCol]) {
 	// if empty zone is clicked previous
 	if (pRow === null || pCol === null) return;
 	// LIGHT DOWN
-	const possibleMoves = possibleMove([pRow, pCol]);
+	const possibleMoves = possibleMove([pRow, pCol], true);
 	const m = arrayConverter(possibleMoves);
 	moveOnOffLight(m, false);
 	clickLight([pRow, pCol], false);
