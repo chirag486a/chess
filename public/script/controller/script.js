@@ -8,7 +8,7 @@ import { retriveRowCol } from "../view/util/utility.js";
 import { moveOnOffLight, clickLight } from "../view/task/task.js";
 // control/movement
 import { move, possibleMove } from "./movement.js";
-import { pinnedCheck } from "./check.js";
+import { pinnedCheck, chessCheck } from "./check.js";
 // utility
 import { arrayConverter } from "./util.js";
 

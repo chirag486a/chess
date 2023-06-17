@@ -60,8 +60,48 @@ const prepareKing = function ([row, col], check) {
     }
   });
 
-  if (check) return pinnedCheck(dArr, pieceObj.type);
-  return dArr;
+	// if you want to check kings valid movement (possible move will ask for it)
+	if(check){
+		
+		// chek is arr which return if there is check to king where the check is comming from;
+		const chek = chessCheck(pieceObj.type);
+		const keys = Object.keys(dArr);
+		for(const key of keys) {
+			// if chek is empty array just don't do the loop
+			if(chek[0] === undefined) break;
+			// its king move dir[key] at key direction
+			if(typeof dArr[key][0] === "number") {
+				const [ro, co] = dArr[key];
+				// this loop will check which direction is check is comming from
+				// if check is comming form top bottom possible move will get mutated
+				for(const [row, col] of chek) {
+					if(!(ro === row && co === col)) continue;
+						let opposite;
+						switch(key) {
+							case "right": opposite = "left"; break; 
+							case "left": opposite = "right"; break;
+
+							case "top": opposite = "bottom"; break;
+							case "bottom": opposite = "top"; break;
+
+							case "topLeft": opposite = "bottomRight"; break;
+							case "bottomRight": opposite = "topLeft"; break;
+							
+							case "topRight": opposite = "bottomLeft"; break;
+							case "bottomLeft": opposite = "topRight"; break;
+							
+							default: opposite = "";
+						}	
+					dArr[opposite] = [];
+				}	
+			}
+		}
+		const pinnedArea = pinnedCheck(dArr, pieceObj.type);
+		return pinnedArea; 
+	} 
+	// if(check) return pinnedCheck(dArr, pieceObj.type);
+
+	return dArr;
 
 
 };
