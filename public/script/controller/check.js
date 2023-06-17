@@ -12,11 +12,34 @@ const getPieceMove = function ([row, col]) {
 	return possibleMove([row, col], false);
 };
 
-const defendKing = function (moveObj, type) {
-	const [row, col] = findKing(type);
-	console.log(moveObj);
-};
-
+const defendKing = function (dArr, canGo) {
+	const dArrFormatted = {};
+	const keys = Object.keys(dArr);
+	for(const key of keys) {
+		if(dArr[key][0] === undefined) continue;
+		if(typeof dArr[key][0] === "number") {
+			const [ ro, co ] = dArr[key];
+			for(const [dRo, dCo] of canGo) {
+				if(ro === dRo && co === dCo) {
+				 	dArrFormatted[key] = dArr[key]; 
+				}
+			}
+			continue;
+		}
+		if(Array.isArray(dArr[key][0])) {
+			dArrFormatted[key] = []
+			const arrLen = dArr[key].length;
+			for(let i = 0; i < arrLen; i++) {
+				const [ro, co] = dArr[key][i];
+				for(const [dRo, dCo] of canGo) {
+					if(ro === dRo && co === dCo) dArrFormatted[key].push([ro, co]);
+				}
+			continue;
+			}
+		}
+	};
+	return dArrFormatted;
+}
 
 const pinnedCheck = function (arrObj, type) {
 	const keys = Object.keys(arrObj);

@@ -148,7 +148,10 @@ const preparePawn = function ([row, col], check) {
   const type = pawnData.type;
   const king = findKing(type);
   const chek = chessCheck(type);
-  console.log(chek);
+	if(chek[0] !== undefined) { 
+		const defendZone =  defendKing(obj, chek)
+		return defendZone
+	}
   return obj;
 
 };
@@ -182,7 +185,7 @@ const prepareKnight = function ([row, col], check) {
   if (!check) return dArr;
   const type = pieceObj.type;
   const chek = chessCheck(type);
-  console.log(chek);
+	if(chek[0] !== undefined) return defendKing(dArr, chek);
 
 
   return dArr;
@@ -245,7 +248,7 @@ const moves = function ([row, col], name, side, check) {
   const pieceObj = givePieceInfo([row, col])
   const type = pieceObj.type;
   const chek = chessCheck(type);
-  console.log(chek);
+	if(chek[0] !== undefined) return defendKing(dArr, chek);
   return dArr;
 };
 
