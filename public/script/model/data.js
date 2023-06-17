@@ -367,6 +367,22 @@ const validMo = function (name, arg) {
 };
 
 
+let turn = "W";
+
+const updateTurn = function(updatedTurn) {
+
+	turn = updatedTurn;
+
+} 
+
+const getTurn = function() {
+
+	return turn;
+
+}
+
+
+
 
 export {
 	provideStep,
@@ -381,5 +397,7 @@ export {
 	deleteRowCol,
 	giveGrid,
 	provideSpecial,
-	findKing
+	findKing,
+	getTurn,
+	updateTurn
 };

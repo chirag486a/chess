@@ -1,6 +1,6 @@
 "use script";
 // data
-import { givePieceInfo, updateRowCol, provideRowCol, deleteRowCol, updatePieceInfo, createPieceInfo, containPiece } from "../model/data.js";
+import { givePieceInfo, updateRowCol, provideRowCol, deleteRowCol, updatePieceInfo, createPieceInfo, containPiece, updateTurn } from "../model/data.js";
 // view
 import { designBoard, piecePlace } from "../view/design/design.js";
 import { boardListener as listenToBoard } from "../view/task/handler.js";
@@ -40,7 +40,10 @@ const onClick = function (ev) {
 	const [row, col] = retriveRowCol(element);
 	const preRowCol = provideRowCol();
 	const contains = containPiece([row, col]);
-
+	const pieceInfo = givePieceInfo([row, col]);
+	const {type} = pieceInfo;
+	
+	
 	if (contains) {
 		if (preRowCol !== null && preRowCol[0] === row && preRowCol[1] === col) {
 			unLight([row, col]);
@@ -53,8 +56,7 @@ const onClick = function (ev) {
 	} else if (!contains) {
 		if (preRowCol === null) return;
 		unLight(preRowCol);
-		move(preRowCol, [row, col]);
-		updatePieceInfo(preRowCol, [row, col]);
+		if(move(preRowCol, [row, col])) updatePieceInfo(preRowCol, [row, col]);
 	}
 };
 
@@ -76,6 +78,7 @@ const piecePlacement = function () {
 		}
 	}
 };
+
 
 // INIT function
 const init = function () {

@@ -11,7 +11,6 @@ const arrayConverter = function (obj) {
     }
     if (typeof obj[prop][0] === "number") {
       arr.push(obj[prop]);
-
     }
   });
 

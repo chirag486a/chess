@@ -3,7 +3,6 @@ import { possibleMove, pawnEats } from "./movement.js";
 import { arrayConverter } from "./util.js";
 import { pawnEatings } from "../model/data.js";
 
-
 const getPieceMove = function ([row, col]) {
 	const { name } = givePieceInfo([row, col]);
 	if (name === "pawn") {
@@ -15,31 +14,31 @@ const getPieceMove = function ([row, col]) {
 const defendKing = function (dArr, canGo) {
 	const dArrFormatted = {};
 	const keys = Object.keys(dArr);
-	for(const key of keys) {
-		if(dArr[key][0] === undefined) continue;
-		if(typeof dArr[key][0] === "number") {
-			const [ ro, co ] = dArr[key];
-			for(const [dRo, dCo] of canGo) {
-				if(ro === dRo && co === dCo) {
-				 	dArrFormatted[key] = dArr[key]; 
+	for (const key of keys) {
+		if (dArr[key][0] === undefined) continue;
+		if (typeof dArr[key][0] === "number") {
+			const [ro, co] = dArr[key];
+			for (const [dRo, dCo] of canGo) {
+				if (ro === dRo && co === dCo) {
+					dArrFormatted[key] = dArr[key];
 				}
 			}
 			continue;
 		}
-		if(Array.isArray(dArr[key][0])) {
-			dArrFormatted[key] = []
+		if (Array.isArray(dArr[key][0])) {
+			dArrFormatted[key] = [];
 			const arrLen = dArr[key].length;
-			for(let i = 0; i < arrLen; i++) {
+			for (let i = 0; i < arrLen; i++) {
 				const [ro, co] = dArr[key][i];
-				for(const [dRo, dCo] of canGo) {
-					if(ro === dRo && co === dCo) dArrFormatted[key].push([ro, co]);
+				for (const [dRo, dCo] of canGo) {
+					if (ro === dRo && co === dCo) dArrFormatted[key].push([ro, co]);
 				}
-			continue;
+				continue;
 			}
 		}
 	};
 	return dArrFormatted;
-}
+};
 
 const pinnedCheck = function (arrObj, type) {
 	const keys = Object.keys(arrObj);
@@ -66,22 +65,17 @@ const pinnedCheck = function (arrObj, type) {
 					if (data[0] === undefined) continue;
 					if (Array.isArray(data[0])) {
 						for (const [r, c] of data) {
-							if (r === kR && c === kC) {
-								arrObj[key] = [];
-							}
+							if (r === kR && c === kC) arrObj[key] = [];
 						}
 						continue;
 					}
 					// if direction is just one step
 					if (typeof data[0] === "number") {
-						if (data[0] === kR && data[1] === kC) {
-							arrObj[key] = [];
-						}
+						if (data[0] === kR && data[1] === kC) arrObj[key] = [];
 						continue;
 					}
 
 				}
-				// moves
 			}
 		}
 	};
@@ -109,30 +103,16 @@ const chessCheck = function (type) {
 				if (data[0] === undefined) continue;
 				if (Array.isArray(data[0])) {
 					for (const [r, c] of data) {
-						if (r === kRow && c === kCol) {
-							return data;
-						}
+						if (r === kRow && c === kCol) return data;
 					}
 					continue;
 				}
-				// if direction is just one step
-
 				if (typeof data[0] === "number") {
 					const [r, c] = data;
-					if (kRow === r && kCol === c) {
-						return data;
-					}
+					if (kRow === r && kCol === c) return data;
 					continue;
 				}
-
 			}
-
-
-
-			// for (const [ro, co] of checkArr) {
-			// 	if (kRow === ro && kCol === co) return true;
-			// }
-
 		}
 	}
 	return [];
