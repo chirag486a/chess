@@ -1,3 +1,5 @@
+"use strict";
+import { givePieceInfo } from "../model/data.js"; //violation but two seperate file needed it  
 const arrayConverter = function (obj) {
   const keys = Object.keys(obj);
   const arr = [];
@@ -18,5 +20,35 @@ const arrayConverter = function (obj) {
 
 };
 
+// Positive Negative
+const positiveNegativeConversion = function (num) {
+	if (num > 0) {
+		return num * -1;
+	} else if (num < 0) {
+		return Math.abs(num);
+	} else {
+		return 0;
+	}
+};
 
-export {arrayConverter} 
+
+
+const compareType = function ([row, col], [gRow, gCol]) {
+  try {
+    const pieceObj = givePieceInfo([row, col]);
+    const pieceType = pieceObj.type;
+
+    const goingPieceObj = givePieceInfo([gRow, gCol]);
+    const goingPieceType = goingPieceObj.type;
+
+    if (pieceType !== goingPieceType) return false;
+    else return true;
+  } catch (err) {
+    throw Error(err.message);
+  }
+};
+
+
+
+
+export {arrayConverter, positiveNegativeConversion, compareType} 

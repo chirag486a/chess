@@ -1,6 +1,6 @@
 "use script";
 // data
-import { givePieceInfo, updateRowCol, provideRowCol, deleteRowCol, updatePieceInfo, createPieceInfo, containPiece, updateTurn } from "../model/data.js";
+import { givePieceInfo, updateRowCol, provideRowCol, deleteRowCol, updatePieceInfo, createPieceInfo, containPiece } from "../model/data.js";
 // view
 import { designBoard, piecePlace } from "../view/design/design.js";
 import { boardListener as listenToBoard } from "../view/task/handler.js";
@@ -8,7 +8,6 @@ import { retriveRowCol } from "../view/util/utility.js";
 import { moveOnOffLight, clickLight } from "../view/task/task.js";
 // control/movement
 import { move, possibleMove } from "./movement.js";
-import { pinnedCheck, chessCheck } from "./check.js";
 // utility
 import { arrayConverter } from "./util.js";
 
@@ -32,7 +31,26 @@ const unLight = function ([pRow, pCol]) {
 	deleteRowCol();
 };
 
+const checkEat = function(preRowCol, [gRow, gCol]) {
+	if(preRowCol === null) return;
+	const [row, col] = preRowCol;  
+	const pieceMoves = possibleMove([row, col], true);
+	
+	const curPieceInfo = givePieceInfo([row, col]);
+	const goPieceInfo = givePieceInfo ([gRow, gCol]);
 
+
+	
+	if(curPieceInfo.type === goPieceInfo.type) return false;
+
+	const pieceArr = arrayConverter(pieceMoves);
+
+	if(pieceArr[0] === undefined) return false;
+	for(const [row, col] of pieceArr) {
+		if(row === gRow && col === gCol) return true;
+	}
+	return false
+}
 
 
 const onClick = function (ev) {
@@ -49,9 +67,17 @@ const onClick = function (ev) {
 			unLight([row, col]);
 			return;
 		}
-		if(preRowCol !== null) unLight(preRowCol);
-		light([row, col]);
-		
+		if(preRowCol !== null) {
+		 unLight(preRowCol);
+			const canEat = checkEat(preRowCol, [row, col]);
+			if(canEat){
+				if(move(preRowCol, [row, col])) {
+						updatePieceInfo(preRowCol, [row, col]);
+						return;
+				}
+			}
+		}
+		if(!checkEat(preRowCol, [row, col])) light([row, col]);
 	//	chessCheck([row, col]);
 	} else if (!contains) {
 		if (preRowCol === null) return;

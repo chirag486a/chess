@@ -1,8 +1,6 @@
-import { givePieceInfo, giveGrid, findKing } from "../model/data.js";
+import { givePieceInfo, findKing, containPiece } from "../model/data.js";
 import { possibleMove, pawnEats } from "./movement.js";
-import { arrayConverter } from "./util.js";
-import { pawnEatings } from "../model/data.js";
-
+import { compareType } from "./util.js";
 const getPieceMove = function ([row, col]) {
 	const { name } = givePieceInfo([row, col]);
 	if (name === "pawn") {
@@ -81,8 +79,8 @@ const pinnedCheck = function (arrObj, type) {
 	};
 	return arrObj;
 };
-const chessCheck = function (type) {
 
+const chessCheck = function (type) {
 	const kingPosition = findKing(type);
 	const [kRow, kCol] = kingPosition;
 	for (let row = 0; row <= 7; row++) {
@@ -93,9 +91,6 @@ const chessCheck = function (type) {
 
 
 			const pieceMoves = getPieceMove([row, col]);
-			const checkArr = arrayConverter(pieceMoves);
-
-
 			const keys = Object.keys(pieceMoves);
 			for (const key of keys) {
 				const data = pieceMoves[key];
@@ -103,13 +98,23 @@ const chessCheck = function (type) {
 				if (data[0] === undefined) continue;
 				if (Array.isArray(data[0])) {
 					for (const [r, c] of data) {
-						if (r === kRow && c === kCol) return data;
+						if (r === kRow && c === kCol) {
+							data.push([row, col]);
+							
+							return data; 
+						};
 					}
 					continue;
 				}
 				if (typeof data[0] === "number") {
 					const [r, c] = data;
-					if (kRow === r && kCol === c) return data;
+					
+					if (kRow === r && kCol === c) {
+						const givingArr = [];
+						givingArr.push([row, col]);
+						givingArr.push(data);
+						return data
+					}
 					continue;
 				}
 			}

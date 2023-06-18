@@ -5,7 +5,7 @@ const localStorageMovableId = "movable";
 let ROWS = 8;
 let COLUMNS = 8;
 const grid = [];
-
+// backend
 const fillGrid = function () {
 	for (let i = 0; i < ROWS; i++) {
 		const gridRows = [];
@@ -16,13 +16,15 @@ const fillGrid = function () {
 	}
 };
 fillGrid();
-
+// Backend
 const createPieceInfo = function (white_position, black_position) {
 	const leftRook = grid[white_position][0];
 	leftRook.name = "rook";
+	leftRook.moved = false;
 
 	const rightRook = grid[white_position][7];
 	rightRook.name = "rook";
+	rightRook.moved = false;
 
 	const leftKnight = grid[white_position][1];
 	leftKnight.name = "knight";
@@ -43,15 +45,16 @@ const createPieceInfo = function (white_position, black_position) {
 	const leftBishop = grid[white_position][2];
 	leftBishop.name = "bishop";
 
-
+	// white pieces done now below copy property of white for black with some property changed
 	for (let i = 0; i < COLUMNS; i++) {
 		grid[black_position][i].name = grid[white_position][i].name;
+		grid[black_position][i].defended = false;
+		grid[white_position][i].defended = false;
 		grid[black_position][i].type = "B";
 		grid[white_position][i].type = "W";
 		grid[black_position][i].upDown = black_position === 7 ? 1 : 0;
 		grid[white_position][i].upDown = white_position === 0 ? 0 : 1;
 		const pName = grid[black_position][i].name;
-
 		if (pName === "knight" || pName === "rook" || pName === "bishop") {
 			if (i < 3) {
 				grid[black_position][i].side = "left";
@@ -66,9 +69,11 @@ const createPieceInfo = function (white_position, black_position) {
 		const six = white_position === 7 ? 6 : 1;
 		const one = black_position === 0 ? 1 : 6;
 
+		// if white is six then sixth is white pawn and oneth is black and vice-versa
 		const sixth = grid[six][i];
 		const oneth = grid[one][i];
 		sixth.name = "pawn";
+		sixth.defended = false;
 		sixth.label = [six, i];
 		sixth.moved = false;
 		sixth.canPass = false;
@@ -77,16 +82,15 @@ const createPieceInfo = function (white_position, black_position) {
 
 		oneth.name = "pawn";
 		oneth.label = [one, i];
+		oneth.defended = false;
 		oneth.moved = false;
 		oneth.canPass = false;
 		oneth.type = "B";
 		oneth.upDown = one === 1 ? 0 : 1;
-
 	}
 
 };
-
-
+console.log(grid);
 const givePieceInfo = function ([row, col]) {
 	try {
 		//	console.log((row >= 0 && row <= 7 && col >= 0 && col <= 7));
@@ -98,10 +102,30 @@ const givePieceInfo = function ([row, col]) {
 	}
 
 };
+const containPiece = function ([row, col]) {
+	try {
+		const pieceData = givePieceInfo([row, col]);
+		if (pieceData.name !== undefined) return true;
+		else return false;
+	} catch (err) {
+		throw Error(err.message)
+	}
+
+};
+const findKing = function (type) {
+	for (let i = 0; i <= 7; i++) {
+		for (let j = 0; j <= 7; j++) {
+			const pieceInFo = givePieceInfo([i, j])
+			if (pieceInFo.name === "king" && pieceInFo.type === type) return [i, j];
+		}
+	}
+};
+
+
+// UPDATE GRID
 const king = function ([preRow, preCol], [movdRow, movdCol]) {
 	grid[movdRow][movdCol] = JSON.parse(JSON.stringify(grid[preRow][preCol]));
 	grid[preRow][preCol] = {};
-	console.log(grid[movdRow][movdCol]);
 	return;
 };
 
@@ -109,12 +133,10 @@ const pawn = function ([preRow, preCol], [movdRow, movdCol]) {
 	grid[movdRow][movdCol] = JSON.parse(JSON.stringify(grid[preRow][preCol]));
 	grid[movdRow][movdCol].moved = true;
 	grid[preRow][preCol] = {};
-	console.log(grid[movdRow][movdCol]);
 	return;
 };
 
 const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) {
-
 	let preObj = grid[preRow][preCol];
 	const preName = preObj.name;
 	if (preName === "pawn") {
@@ -125,13 +147,29 @@ const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) {
 		king([preRow, preCol], [movdRow, movdCol]);
 		return;
 	}
-
-
 	grid[movdRow][movdCol] = { ...preObj };
 	grid[preRow][preCol] = {};
 
 };
 
+// ATTACKED PIECES
+const deletedPiece = {
+	W: [],
+	B: [],
+}
+
+const deletePieceInfo = function([row, col]) {
+
+	const pieceInfo = givePieceInfo([row, col]);
+
+	deletedPiece[pieceInfo.type]  = {... pieceInfo}	
+
+	grid[row][col] = {};
+
+}
+
+
+// Row & Col which was selected previously
 let rowCol = [];
 const updateRowCol = function ([row, col]) {
 	rowCol = [row, col];
@@ -147,29 +185,8 @@ const giveGrid = function () {
 	return grid;
 
 };
-const containPiece = function ([row, col]) {
-	try {
-		const pieceData = givePieceInfo([row, col]);
-		if (pieceData.name !== undefined) return true;
-		else return false;
-	} catch (err) {
-		throw Error(err.message)
-	}
-
-};
-const findKing = function (type) {
-
-	for (let i = 0; i <= 7; i++) {
-		for (let j = 0; j <= 7; j++) {
-			const pieceInFo = givePieceInfo([i, j])
-			if (pieceInFo.name === "king" && pieceInFo.type === type) return [i, j];
-		}
-	}
 
 
-
-
-};
 
 // Valid data
 
@@ -314,19 +331,13 @@ const special = {
 };
 
 const provideSpecial = function (name) {
-	
 	if(typeof special[name] !== "object") throw new Error(`No Special Moves For ${name}`)
 	return special[name];
-
-
-
-
 }
 
 // export as getStep
 const provideStep = function (name) {
 	if (name === "knight" || name === "pawn" || name === "king") {
-
 		return valid[name];
 	}
 	if (name === "queen" || name === "rook" || name === "bishop") {
@@ -339,46 +350,15 @@ const provideStep = function (name) {
 
 
 
-// Positive Negative
-const positiveNegativeConversion = function (num) {
-	if (num > 0) {
-		return num * -1;
-	} else if (num < 0) {
-		return Math.abs(num);
-	} else {
-		return 0;
-	}
-};
 
 
-
-
-const validMo = function (name, arg) {
-	switch (name) {
-		case "king": return king(arg); break;
-		case "queen": return queen(arg); break;
-		case "bishop": return bishop(arg); break;
-		case "knight": return knight(arg); break;
-		case "rook": return rook(arg); break;
-		case "pawn": return pawn(arg); break;
-		default: throw new Error();
-	}
-
-};
-
-
+// Whose turn is it
 let turn = "W";
-
 const updateTurn = function(updatedTurn) {
-
 	turn = updatedTurn;
-
 } 
-
 const getTurn = function() {
-
 	return turn;
-
 }
 
 
@@ -387,7 +367,6 @@ const getTurn = function() {
 export {
 	provideStep,
 	createPieceInfo,
-	positiveNegativeConversion,
 	givePieceInfo,
 	pawnEatings,
 	containPiece,
@@ -399,5 +378,6 @@ export {
 	provideSpecial,
 	findKing,
 	getTurn,
-	updateTurn
+	updateTurn,
+	deletePieceInfo
 };

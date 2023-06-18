@@ -36,10 +36,18 @@ const moveWhere = function ([row, col]) {
 const move = function ([row, col], [dRow, dCol]) {
   const whichEl = moveWhich([row, col]);
   const whereEl = moveWhere([dRow, dCol]);
+	deleteElement([dRow, dCol]);
   appendEl(whereEl, whichEl);
 
 };
 
+
+
+const deleteElement = function([row, col]){
+	const selectEl = selectZone([row, col]);
+	selectEl.innerHTML = "";	
+
+}
 
 
 export {
@@ -47,5 +55,6 @@ export {
   moveWhich,
   move,
   moveOnOffLight,
-  clickLight
+  clickLight,
+	deleteElement,
 };

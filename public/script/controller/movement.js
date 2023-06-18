@@ -1,37 +1,12 @@
-import { positiveNegativeConversion, provideStep, givePieceInfo, pawnEatings, updatePieceInfo, deleteRowCol, containPiece, provideSpecial, findKing, getTurn, updateTurn } from "../model/data.js";
-import { move as send } from "../view/task/task.js";
+import { provideStep, givePieceInfo, pawnEatings,  deleteRowCol, containPiece, provideSpecial, findKing, getTurn, updateTurn, deletePieceInfo } from "../model/data.js";
+import { move as send, deleteElement } from "../view/task/task.js";
 import { pinnedCheck, defendKing, chessCheck } from "./check.js";
-import { arrayConverter } from "./util.js";
+import { arrayConverter, positiveNegativeConversion, compareType } from "./util.js";
 
-const blocked = function ([gRow, gCol], [row, col]) {
-  try {
-    const curPieceObj = givePieceInfo([row, col]);
-    const goingPieceObj = givePieceInfo([gRow, gCol]);
 
-    if (typeof goingPieceObj !== "object") return true;
-    if (curPieceObj.type === goingPieceObj.type) {
-      return true;
-    } else return false;
 
-  } catch (err) {
-    return true;
-  }
-};
 
-const compareType = function ([row, col], [gRow, gCol]) {
-  try {
-    const pieceObj = givePieceInfo([row, col]);
-    const pieceType = pieceObj.type;
 
-    const goingPieceObj = givePieceInfo([gRow, gCol]);
-    const goingPieceType = goingPieceObj.type;
-
-    if (pieceType !== goingPieceType) return false;
-    else return true;
-  } catch (err) {
-    throw Error(err.message);
-  }
-};
 const prepareKing = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
   const { step } = provideStep(pieceObj.name);
@@ -144,6 +119,8 @@ const preparePawn = function ([row, col], check) {
     if (!containPiece([fRow, fCol])) {
       obj = { ...obj, top: [fRow, fCol] };
     }
+    // can pass functionality
+    // code
 
   } catch (err) {
     console.log("Top Move");
@@ -225,7 +202,9 @@ const prepareKnight = function ([row, col], check) {
   if (!check) return dArr;
   const type = pieceObj.type;
   const chek = chessCheck(type);
-  if (chek[0] !== undefined) return defendKing(dArr, chek);
+  if (chek[0] !== undefined) {
+    return defendKing(dArr, chek);
+  }
 
 
   return dArr;
@@ -275,12 +254,8 @@ const moves = function ([row, col], name, side, check) {
     const pawnMoves = preparePawn([row, col], check);
     return pawnMoves;
   }
-
-
   if (name === "king") {
     const kingMoves = prepareKing([row, col], check);
-
-
     return kingMoves;
   }
   if (name === "knight") {
@@ -289,31 +264,35 @@ const moves = function ([row, col], name, side, check) {
   }
   if (name === undefined) return {};
   // name === (queen||rook||bishop)
-  const dArr = queenRookBishop([row, col], name, side)
+  const dArr = queenRookBishop([row, col], name, side);
 
   if (!check) return dArr;
   const pieceObj = givePieceInfo([row, col]);
   const type = pieceObj.type;
   const chek = chessCheck(type);
-  if (chek[0] !== undefined) return defendKing(dArr, chek);
+  if (chek[0] !== undefined) {
+    return defendKing(dArr, chek);
+  }
   return dArr;
 };
 
 
 
 
-
+/*
+ * @param {Array} [row, col] row and column of asked piece 
+ * @param {boolean} check wheather to check for attack to king or not
+ * @returns {Array}
+*/
 const possibleMove = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
   const pieceName = pieceObj.name;
   const side = pieceObj.upDown;
   const step = moves([row, col], pieceName, side, check);
   return step;
-
 };
 
 const moveChecker = function ([row, col], [gRow, gCol]) {
-
   const moves = possibleMove([row, col], true);
   const movesArr = arrayConverter(moves);
   if (movesArr[0] === undefined) return false;
@@ -326,12 +305,18 @@ const moveChecker = function ([row, col], [gRow, gCol]) {
 
 };
 
+
+const deletePiece = function ([row, col]) {
+  deletePieceInfo([row, col]);
+};
+
+
 const move = function ([row, col], [gRow, gCol]) {
   const pieceInfo = givePieceInfo([row, col]);
   if (!moveChecker([row, col], [gRow, gCol])) return false;
-  console.log(moveChecker([row, col], [gRow, gCol]));
   const { type } = pieceInfo;
   if (!(type === getTurn())) return false;
+  if (containPiece([gRow, gCol])) deletePiece([gRow, gCol]);
   send([row, col], [gRow, gCol]);
   updateTurn(type === "W" ? "B" : "W");
   deleteRowCol();
