@@ -83,7 +83,7 @@ const prepareKing = function ([row, col], check) {
 const pawnEats = function ([row, col]) {
   const { upDown } = givePieceInfo([row, col]);
   const side = upDown;
-  const eatObj = pawnEatings();
+  const eatObj = pawnEatings([row, col]);
   const eatings = Object.keys(eatObj);
   const eat = {};
   eatings.forEach(eatDir => {
@@ -92,8 +92,10 @@ const pawnEats = function ([row, col]) {
     let gCol = side === 0 ? positiveNegativeConversion(eatObj[eatDir][1]) + col : eatObj[eatDir][1] + col;
     try {
       if (((gRow >= 0 && gRow <= 7) && (gCol >= 0 && gCol <= 7))) {
+				
         eat[eatDir] = [gRow, gCol];
       }
+
     } catch (err) {
       return;
     }
@@ -102,6 +104,9 @@ const pawnEats = function ([row, col]) {
 
   return eat;
 };
+
+
+
 const preparePawn = function ([row, col], check) {
   const pawnData = givePieceInfo([row, col]);
   const { step } = provideStep(pawnData.name);
@@ -151,9 +156,27 @@ const preparePawn = function ([row, col], check) {
     try {
       if (containPiece([gRow, gCol])) {
         if (!compareType([row, col], [gRow, gCol])) {
-          eat[dir] = [gRow, gCol];
+					if(dir !== "left" && dir !== "right") eat[dir] = [gRow, gCol];
         }
       }
+			if(!containPiece([gRow, gCol])) {
+				if(dir === "topLeft") {
+					if(eatObj.left !== undefined) {
+						const [lRow, lCol] = eatObj.left;
+						const lPieceInfo = givePieceInfo([lRow, lCol]);
+						if(lPieceInfo.name === "pawn" && lPieceInfo.canPass === true) eat[dir] = [gRow, gCol];	
+					}
+				}
+				if(dir === "topRight") {
+					if(eatObj.right !== undefined) {
+						const [rRow, rCol] = eatObj.right;
+						const rPieceInfo = givePieceInfo([rRow, rCol]);	
+						if(rPieceInfo.name === "pawn" && rPieceInfo.canPass === true) eat[dir] = [gRow, gCol];
+
+
+					}
+				}
+			}
     } catch (err) {
       return;
     }
@@ -311,12 +334,49 @@ const deletePiece = function ([row, col]) {
 };
 
 
+
+const checkPawnSpecial = function([row, col], [gRow, gCol]) {
+	
+	
+  const pieceInfo = givePieceInfo([row, col]);
+	pieceInfo.canPass = false;
+	const {upDown:side} = pieceInfo;
+	if(pieceInfo.moved === false) {
+		const special = provideSpecial("pawn")
+		
+		const { doubleTop } = special;
+		const [dTRow, dTCol] = doubleTop;
+
+		const mRow = side === 0 ? positiveNegativeConversion(dTRow) + row : dTRow + row;
+		const mCol = side === 0 ? positiveNegativeConversion(dTCol)	+ col : dTCol + col;
+
+		if(mRow === gRow && mCol === gCol) {
+			pieceInfo.canPass = true;	
+		}
+
+	}	
+	
+	if(col !== gCol) {
+		if(!containPiece([gRow, gCol])) {
+			const deleteRow = side === 0 ? +1 + gRow : 1 + gRow;
+			const deleteCol = gCol;
+			 	
+			console.log(deleteRow, deleteCol)	
+			deletePiece([deleteRow, deleteCol]);
+			deleteElement([deleteRow, deleteCol]);		
+
+		}
+	}
+}
+
+
 const move = function ([row, col], [gRow, gCol]) {
   const pieceInfo = givePieceInfo([row, col]);
   if (!moveChecker([row, col], [gRow, gCol])) return false;
+	if(pieceInfo.name === "pawn") checkPawnSpecial([row, col], [gRow, gCol]);
   const { type } = pieceInfo;
   if (!(type === getTurn())) return false;
-  if (containPiece([gRow, gCol])) deletePiece([gRow, gCol]);
+  if (containPiece([gRow, gCol])) deletePieceInfo([gRow, gCol]);
   send([row, col], [gRow, gCol]);
   updateTurn(type === "W" ? "B" : "W");
   deleteRowCol();

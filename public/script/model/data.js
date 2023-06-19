@@ -130,6 +130,19 @@ const king = function ([preRow, preCol], [movdRow, movdCol]) {
 };
 
 const pawn = function ([preRow, preCol], [movdRow, movdCol]) {
+	
+	for(let i = 0; i <= 7; i++) {
+		for(let j = 0; j <= 7; j++) {
+
+			const pieceInfo = givePieceInfo([i,j]);
+			if(pieceInfo.name !== "pawn") continue;
+			
+			if(i === preRow && j === preCol) continue;
+			
+			pieceInfo.canPass = false;
+
+		}
+	}
 	grid[movdRow][movdCol] = JSON.parse(JSON.stringify(grid[preRow][preCol]));
 	grid[movdRow][movdCol].moved = true;
 	grid[preRow][preCol] = {};
@@ -310,9 +323,12 @@ const valid = {
 };
 
 const pawnEatings = function () {
+
 	return {
 		topRight,
-		topLeft
+		topLeft,
+		left,
+		right
 	};
 };
 
@@ -329,6 +345,7 @@ const special = {
 		 doubleTop
 	}
 };
+
 
 const provideSpecial = function (name) {
 	if(typeof special[name] !== "object") throw new Error(`No Special Moves For ${name}`)
