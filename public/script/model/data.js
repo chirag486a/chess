@@ -50,6 +50,7 @@ const createPieceInfo = function (white_position, black_position) {
 		grid[black_position][i].name = grid[white_position][i].name;
 		grid[black_position][i].defended = false;
 		grid[white_position][i].defended = false;
+		grid[black_position][i].moved = false;
 		grid[black_position][i].type = "B";
 		grid[white_position][i].type = "W";
 		grid[black_position][i].upDown = black_position === 7 ? 1 : 0;
@@ -210,6 +211,7 @@ const double_bottom = [2, 0];
 
 const right = [0, 1];
 const doubleRight = [0, 2];
+
 const left = [0, -1];
 const doubleLeft = [0, -2];
 const tripleLeft = [0, -3];
@@ -334,8 +336,8 @@ const pawnEatings = function () {
 
 const special = {
 	king: {
-		left: doubleLeft,
-		right: doubleRight
+		doubleRight,
+		doubleLeft,
 	},
 	rook: {
 		left: doubleRight,

@@ -6,11 +6,21 @@ import { arrayConverter, positiveNegativeConversion, compareType } from "./util.
 
 
 
+const preparePawnCastling = function([row, col]) {
+
+	
+
+
+
+
+
+}
 
 const prepareKing = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
+	
   const { step } = provideStep(pieceObj.name);
-  const { upDown } = pieceObj;
+  const { upDown, type } = pieceObj;
   const side = upDown;
   const extracting = Object.keys(step);
   const dArr = {};
@@ -20,26 +30,101 @@ const prepareKing = function ([row, col], check) {
     mCol = side === 0 ? positiveNegativeConversion(mCol) : mCol;
     const curRow = row + mRow;
     const curCol = col + mCol;
+		
 
     dArr[dir] = [];
     try {
 
       if (!containPiece([curRow, curCol])) {
         dArr[dir] = [curRow, curCol];
+				
       }
       if (containPiece([curRow, curCol]) && !compareType([row, col], [curRow, curCol])) {
         dArr[dir] = [curRow, curCol];
       }
-    } catch (err) {
+			    } catch (err) {
       return;
     }
   });
 
+
+
   // if you want to check kings valid movement (possible move will ask for it)
   if (check) {
 
+	if(pieceObj.moved === false) {
+
+				const leftRookCol = side === 0 ? 7 : 1;
+				const rightRookCol = side === 0 ? 1 : 7;
+				const rookRow = side;
+			
+				const selectRightRook = givePieceInfo([rookRow, rightRookCol]);
+				const selectLeftRook = givePieceInfo([rookRow, leftRookCol]);
+		
+				if(selectRightRook.moved === false) {
+					
+					
+					const {doubleRight} = provideSpecial("king");	
+					const [mRow, mCol] = doubleRight;
+
+					const sRow = side === 0 ? positiveNegativeConversion(mRow) + row : mRow + row;
+					const sCol = side === 0 ? positiveNegativeConversion(mCol) + col : mCol + col;	
+
+					const {right} = step;
+					
+					const rRow = side === 0 ? positiveNegativeConversion(right[0]) + row : right[0] + row;
+					const rCol = side === 0 ? positiveNegativeConversion(right[1]) + col : right[1] + col;
+					
+					const sCheck = chessCheck([sRow, sCol], type)[0] === undefined ? true : false;
+					const rCheck = chessCheck([rRow, rCol], type)[0] === undefined ? true : false;
+					
+					const sContainPiece = containPiece([sRow, sCol]);
+					const rContainPiece = containPiece([rRow, rCol]);
+
+					if(sCheck && rCheck && !sContainPiece && !rContainPiece) {
+						if(type === "B") dArr.doubleRight = [sRow, sCol]
+						if(type === "W") {
+							const wCRow = sRow;
+							const wCCol = sCol + 1;
+							if(!containPiece([wCRow, wCCol])) dArr.doubleRight = [sRow, sCol]
+						}
+					}
+				}
+				if(selectLeftRook.moved === false) {
+					const {doubleLeft} = provideSpecial("king");		
+					const [mRow, mCol] = doubleLeft;
+
+					const sRow = side === 0 ? positiveNegativeConversion(mRow) + row : mRow + row;
+					const sCol = side === 0 ? positiveNegativeConversion(mCol) + col : mCol + col;	
+						
+					const {left} = step;
+					
+					const lRow = side === 0 ? positiveNegativeConversion(left[0]) + row : left[0] + row;
+					const lCol = side === 0 ? positiveNegativeConversion(left[1]) + col : left[1] + col;
+					
+					const sCheck = chessCheck([sRow, sCol], type)[0] === undefined ? true : false;
+					const lCheck = chessCheck([lRow, lCol], type)[0] === undefined ? true : false;
+					
+					const sContainPiece = containPiece([sRow, sCol]);
+					const lContainPiece = containPiece([lRow, lCol]);
+
+					if(sCheck && lCheck && !sContainPiece && !lContainPiece) {
+						if(type === "W") dArr.doubleRight = [sRow, sCol]
+						if(type === "B") {
+							const wCRow = sRow;
+							const wCCol = sCol + 1;
+							if(!containPiece([wCRow, wCCol])) dArr.doubleLeft = [sRow, sCol]
+						}
+					}
+
+				}
+
+			} 
+
+
+
     // chek is arr which return if there is check to king where the check is comming from;
-    const chek = chessCheck(pieceObj.type);
+    const chek = chessCheck([row, col], type);
     const keys = Object.keys(dArr);
     for (const key of keys) {
       // if chek is empty array just don't do the loop
@@ -187,7 +272,7 @@ const preparePawn = function ([row, col], check) {
   // check for king check
   const type = pawnData.type;
   const king = findKing(type);
-  const chek = chessCheck(type);
+  const chek = chessCheck(king, type);
   if (chek[0] !== undefined) {
     const defendZone = defendKing(obj, chek);
     return defendZone;
@@ -224,7 +309,8 @@ const prepareKnight = function ([row, col], check) {
 
   if (!check) return dArr;
   const type = pieceObj.type;
-  const chek = chessCheck(type);
+	const king = findKing(type)
+  const chek = chessCheck(king, type);
   if (chek[0] !== undefined) {
     return defendKing(dArr, chek);
   }
@@ -292,7 +378,8 @@ const moves = function ([row, col], name, side, check) {
   if (!check) return dArr;
   const pieceObj = givePieceInfo([row, col]);
   const type = pieceObj.type;
-  const chek = chessCheck(type);
+	const king = findKing(type)
+  const chek = chessCheck(king, type);
   if (chek[0] !== undefined) {
     return defendKing(dArr, chek);
   }

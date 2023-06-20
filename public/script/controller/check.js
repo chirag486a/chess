@@ -80,9 +80,7 @@ const pinnedCheck = function (arrObj, type) {
 	return arrObj;
 };
 
-const chessCheck = function (type) {
-	const kingPosition = findKing(type);
-	const [kRow, kCol] = kingPosition;
+const chessCheck = function ([kRow, kCol], type) {
 	for (let row = 0; row <= 7; row++) {
 		for (let col = 0; col <= 7; col++) {
 			const getPieceInfo = givePieceInfo([row, col]);
@@ -121,7 +119,6 @@ const chessCheck = function (type) {
 		}
 	}
 	return [];
-
 };
 
 
