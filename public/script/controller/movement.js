@@ -1,4 +1,4 @@
-import { provideStep, givePieceInfo, pawnEatings,  deleteRowCol, containPiece, provideSpecial, findKing, getTurn, updateTurn, deletePieceInfo } from "../model/data.js";
+import { provideStep, givePieceInfo, pawnEatings, deleteRowCol, containPiece, provideSpecial, findKing, getTurn, updateTurn, deletePieceInfo } from "../model/data.js";
 import { move as send, deleteElement } from "../view/task/task.js";
 import { pinnedCheck, defendKing, chessCheck } from "./check.js";
 import { arrayConverter, positiveNegativeConversion, compareType } from "./util.js";
@@ -6,19 +6,19 @@ import { arrayConverter, positiveNegativeConversion, compareType } from "./util.
 
 
 
-const preparePawnCastling = function([row, col]) {
-
-	
+const preparePawnCastling = function ([row, col]) {
 
 
 
 
 
-}
+
+
+};
 
 const prepareKing = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
-	
+
   const { step } = provideStep(pieceObj.name);
   const { upDown, type } = pieceObj;
   const side = upDown;
@@ -30,19 +30,19 @@ const prepareKing = function ([row, col], check) {
     mCol = side === 0 ? positiveNegativeConversion(mCol) : mCol;
     const curRow = row + mRow;
     const curCol = col + mCol;
-		
+
 
     dArr[dir] = [];
     try {
 
       if (!containPiece([curRow, curCol])) {
         dArr[dir] = [curRow, curCol];
-				
+
       }
       if (containPiece([curRow, curCol]) && !compareType([row, col], [curRow, curCol])) {
         dArr[dir] = [curRow, curCol];
       }
-			    } catch (err) {
+    } catch (err) {
       return;
     }
   });
@@ -52,77 +52,76 @@ const prepareKing = function ([row, col], check) {
   // if you want to check kings valid movement (possible move will ask for it)
   if (check) {
 
-	if(pieceObj.moved === false) {
+    if (pieceObj.moved === false) {
 
-				const leftRookCol = side === 0 ? 7 : 1;
-				const rightRookCol = side === 0 ? 1 : 7;
-				const rookRow = side;
-			
-				const selectRightRook = givePieceInfo([rookRow, rightRookCol]);
-				const selectLeftRook = givePieceInfo([rookRow, leftRookCol]);
-		
-				if(selectRightRook.moved === false) {
-					
-					
-					const {doubleRight} = provideSpecial("king");	
-					const [mRow, mCol] = doubleRight;
-
-					const sRow = side === 0 ? positiveNegativeConversion(mRow) + row : mRow + row;
-					const sCol = side === 0 ? positiveNegativeConversion(mCol) + col : mCol + col;	
-
-					const {right} = step;
-					
-					const rRow = side === 0 ? positiveNegativeConversion(right[0]) + row : right[0] + row;
-					const rCol = side === 0 ? positiveNegativeConversion(right[1]) + col : right[1] + col;
-					
-					const sCheck = chessCheck([sRow, sCol], type)[0] === undefined ? true : false;
-					const rCheck = chessCheck([rRow, rCol], type)[0] === undefined ? true : false;
-					
-					const sContainPiece = containPiece([sRow, sCol]);
-					const rContainPiece = containPiece([rRow, rCol]);
-
-					if(sCheck && rCheck && !sContainPiece && !rContainPiece) {
-						if(type === "B") dArr.doubleRight = [sRow, sCol]
-						if(type === "W") {
-							const wCRow = sRow;
-							const wCCol = sCol + 1;
-							if(!containPiece([wCRow, wCCol])) dArr.doubleRight = [sRow, sCol]
-						}
-					}
-				}
-				if(selectLeftRook.moved === false) {
-					const {doubleLeft} = provideSpecial("king");		
-					const [mRow, mCol] = doubleLeft;
-
-					const sRow = side === 0 ? positiveNegativeConversion(mRow) + row : mRow + row;
-					const sCol = side === 0 ? positiveNegativeConversion(mCol) + col : mCol + col;	
-						
-					const {left} = step;
-					
-					const lRow = side === 0 ? positiveNegativeConversion(left[0]) + row : left[0] + row;
-					const lCol = side === 0 ? positiveNegativeConversion(left[1]) + col : left[1] + col;
-					
-					const sCheck = chessCheck([sRow, sCol], type)[0] === undefined ? true : false;
-					const lCheck = chessCheck([lRow, lCol], type)[0] === undefined ? true : false;
-					
-					const sContainPiece = containPiece([sRow, sCol]);
-					const lContainPiece = containPiece([lRow, lCol]);
-
-					if(sCheck && lCheck && !sContainPiece && !lContainPiece) {
-						if(type === "W") dArr.doubleRight = [sRow, sCol]
-						if(type === "B") {
-							const wCRow = sRow;
-							const wCCol = sCol + 1;
-							if(!containPiece([wCRow, wCCol])) dArr.doubleLeft = [sRow, sCol]
-						}
-					}
-
-				}
-
-			} 
+      const leftRookCol = side === 0 ? 7 : 0;
+      const rightRookCol = side === 0 ? 0 : 7;
+      const rookRow = side === 1 ? 7 : 0;
 
 
+      const selectRightRook = givePieceInfo([rookRow, rightRookCol]);
+      const selectLeftRook = givePieceInfo([rookRow, leftRookCol]);
 
+      if (selectRightRook.moved === false) {
+
+        const { doubleRight } = provideSpecial("king");
+        const [mRow, mCol] = doubleRight;
+
+        const sRow = side === 0 ? positiveNegativeConversion(mRow) + row : mRow + row;
+        const sCol = side === 0 ? positiveNegativeConversion(mCol) + col : mCol + col;
+
+        const { right } = step;
+
+        const rRow = side === 0 ? positiveNegativeConversion(right[0]) + row : right[0] + row;
+        const rCol = side === 0 ? positiveNegativeConversion(right[1]) + col : right[1] + col;
+
+        const sCheck = chessCheck([sRow, sCol], type)[0] === undefined ? true : false;
+        const rCheck = chessCheck([rRow, rCol], type)[0] === undefined ? true : false;
+
+        const sContainPiece = containPiece([sRow, sCol]);
+        const rContainPiece = containPiece([rRow, rCol]);
+
+        if (sCheck && rCheck && !sContainPiece && !rContainPiece) {
+          if (type === "B") dArr.doubleRight = [sRow, sCol];
+          if (type === "W") {
+            const wCRow = sRow;
+            const wCCol = sCol + 1;
+            if (!containPiece([wCRow, wCCol])) dArr.doubleRight = [sRow, sCol];
+          }
+        }
+      }
+      console.log(dArr);
+      if (selectLeftRook.moved === false) {
+        const { doubleLeft } = provideSpecial("king");
+        const [mRow, mCol] = doubleLeft;
+
+        const sRow = side === 0 ? positiveNegativeConversion(mRow) + row : mRow + row;
+        const sCol = side === 0 ? positiveNegativeConversion(mCol) + col : mCol + col;
+
+        const { left } = step;
+
+        const lRow = side === 0 ? positiveNegativeConversion(left[0]) + row : left[0] + row;
+        const lCol = side === 0 ? positiveNegativeConversion(left[1]) + col : left[1] + col;
+
+        const sCheck = chessCheck([sRow, sCol], type)[0] === undefined ? true : false;
+        const lCheck = chessCheck([lRow, lCol], type)[0] === undefined ? true : false;
+
+        const sContainPiece = containPiece([sRow, sCol]);
+        const lContainPiece = containPiece([lRow, lCol]);
+
+        if (sCheck && lCheck && !sContainPiece && !lContainPiece) {
+          if (type === "W") dArr.doubleRight = [sRow, sCol];
+          if (type === "B") {
+            const wCRow = sRow;
+            const wCCol = sCol + 1;
+            if (!containPiece([wCRow, wCCol])) dArr.doubleRight = [sRow, sCol];
+          }
+        }
+
+      }
+
+    }
+    console.log(dArr);
     // chek is arr which return if there is check to king where the check is comming from;
     const chek = chessCheck([row, col], type);
     const keys = Object.keys(dArr);
@@ -177,7 +176,7 @@ const pawnEats = function ([row, col]) {
     let gCol = side === 0 ? positiveNegativeConversion(eatObj[eatDir][1]) + col : eatObj[eatDir][1] + col;
     try {
       if (((gRow >= 0 && gRow <= 7) && (gCol >= 0 && gCol <= 7))) {
-				
+
         eat[eatDir] = [gRow, gCol];
       }
 
@@ -241,27 +240,27 @@ const preparePawn = function ([row, col], check) {
     try {
       if (containPiece([gRow, gCol])) {
         if (!compareType([row, col], [gRow, gCol])) {
-					if(dir !== "left" && dir !== "right") eat[dir] = [gRow, gCol];
+          if (dir !== "left" && dir !== "right") eat[dir] = [gRow, gCol];
         }
       }
-			if(!containPiece([gRow, gCol])) {
-				if(dir === "topLeft") {
-					if(eatObj.left !== undefined) {
-						const [lRow, lCol] = eatObj.left;
-						const lPieceInfo = givePieceInfo([lRow, lCol]);
-						if(lPieceInfo.name === "pawn" && lPieceInfo.canPass === true) eat[dir] = [gRow, gCol];	
-					}
-				}
-				if(dir === "topRight") {
-					if(eatObj.right !== undefined) {
-						const [rRow, rCol] = eatObj.right;
-						const rPieceInfo = givePieceInfo([rRow, rCol]);	
-						if(rPieceInfo.name === "pawn" && rPieceInfo.canPass === true) eat[dir] = [gRow, gCol];
+      if (!containPiece([gRow, gCol])) {
+        if (dir === "topLeft") {
+          if (eatObj.left !== undefined) {
+            const [lRow, lCol] = eatObj.left;
+            const lPieceInfo = givePieceInfo([lRow, lCol]);
+            if (lPieceInfo.name === "pawn" && lPieceInfo.canPass === true) eat[dir] = [gRow, gCol];
+          }
+        }
+        if (dir === "topRight") {
+          if (eatObj.right !== undefined) {
+            const [rRow, rCol] = eatObj.right;
+            const rPieceInfo = givePieceInfo([rRow, rCol]);
+            if (rPieceInfo.name === "pawn" && rPieceInfo.canPass === true) eat[dir] = [gRow, gCol];
 
 
-					}
-				}
-			}
+          }
+        }
+      }
     } catch (err) {
       return;
     }
@@ -309,7 +308,7 @@ const prepareKnight = function ([row, col], check) {
 
   if (!check) return dArr;
   const type = pieceObj.type;
-	const king = findKing(type)
+  const king = findKing(type);
   const chek = chessCheck(king, type);
   if (chek[0] !== undefined) {
     return defendKing(dArr, chek);
@@ -378,7 +377,7 @@ const moves = function ([row, col], name, side, check) {
   if (!check) return dArr;
   const pieceObj = givePieceInfo([row, col]);
   const type = pieceObj.type;
-	const king = findKing(type)
+  const king = findKing(type);
   const chek = chessCheck(king, type);
   if (chek[0] !== undefined) {
     return defendKing(dArr, chek);
@@ -422,45 +421,107 @@ const deletePiece = function ([row, col]) {
 
 
 
-const checkPawnSpecial = function([row, col], [gRow, gCol]) {
-	
-	
+const checkPawnSpecial = function ([row, col], [gRow, gCol]) {
+
+
   const pieceInfo = givePieceInfo([row, col]);
-	pieceInfo.canPass = false;
-	const {upDown:side} = pieceInfo;
-	if(pieceInfo.moved === false) {
-		const special = provideSpecial("pawn")
-		
-		const { doubleTop } = special;
-		const [dTRow, dTCol] = doubleTop;
+  pieceInfo.canPass = false;
+  const { upDown: side } = pieceInfo;
+  if (pieceInfo.moved === false) {
+    const special = provideSpecial("pawn");
 
-		const mRow = side === 0 ? positiveNegativeConversion(dTRow) + row : dTRow + row;
-		const mCol = side === 0 ? positiveNegativeConversion(dTCol)	+ col : dTCol + col;
+    const { doubleTop } = special;
+    const [dTRow, dTCol] = doubleTop;
 
-		if(mRow === gRow && mCol === gCol) {
-			pieceInfo.canPass = true;	
-		}
+    const mRow = side === 0 ? positiveNegativeConversion(dTRow) + row : dTRow + row;
+    const mCol = side === 0 ? positiveNegativeConversion(dTCol) + col : dTCol + col;
 
-	}	
-	
-	if(col !== gCol) {
-		if(!containPiece([gRow, gCol])) {
-			const deleteRow = side === 0 ? +1 + gRow : 1 + gRow;
-			const deleteCol = gCol;
-			 	
-			console.log(deleteRow, deleteCol)	
-			deletePiece([deleteRow, deleteCol]);
-			deleteElement([deleteRow, deleteCol]);		
+    if (mRow === gRow && mCol === gCol) {
+      pieceInfo.canPass = true;
+    }
 
-		}
-	}
-}
+  }
 
+  if (col !== gCol) {
+    if (!containPiece([gRow, gCol])) {
+      const deleteRow = side === 0 ? +1 + gRow : 1 + gRow;
+      const deleteCol = gCol;
+
+      console.log(deleteRow, deleteCol);
+      deletePiece([deleteRow, deleteCol]);
+      deleteElement([deleteRow, deleteCol]);
+
+    }
+  }
+};
+
+
+const kingSpecialChecker = function ([row, col], [gRow, gCol]) {
+  const pieceInfo = givePieceInfo([row, col]);
+
+  const moves = possibleMove([row, col], true);
+  const { moved: kMoved } = pieceInfo;
+  const { type } = pieceInfo;
+  const { upDown: side } = pieceInfo;
+
+  if (kMoved === true) return false;
+  const kSpecial = provideSpecial("king");
+  const rSpecial = provideSpecial("rook");
+
+  const { doubleRight, doubleLeft } = kSpecial;
+  const { left, right } = rSpecial;
+
+  const { doubleLeftMove, doubleRightMove } = moves;
+
+  if (doubleLeft !== undefined) {
+    const [dLRow, dLCol] = doubleLeftMove;
+    const sRow = side === 1 ? 7 : 0;
+    const sCol = side === 0 ? positiveNegativeConversion(doubleLeft[1]) + gCol : doubleLeft[1] + gCol;
+
+    if (sRow === dLRow && sCol === dLCol) {
+      // left
+      // rook Go Row
+      // rook Go Col
+      const [rGRow, rGCol] = side === 1 ? [positiveNegativeConversion(left[0]), positiveNegativeConversion(left[1])] : left;
+      const leftRookRow = side === 0 ? 0 : 7;
+      const leftRookCol = side === 0 ? 7 : 0;
+
+      const rookGoSpecialRow = rGRow + leftRookRow;
+      const rookGoSpecialCol = rGCol + leftRookCol;
+
+      console.log(rookGoSpecialCol, rookGoSpecialCol);
+
+    }
+
+  }
+  if (doubleRight !== undefined) {
+    // right
+    // rook go Row
+    // rook Go Col
+    const [dRRow, dRCol] = doubleRightMove;
+    const sRow = side === 1 ? 7 : 0;
+    const sCol = side === 0 ? positiveNegativeConversion(doubleRight[1]) + gCol : doubleRight[1] + gCol;
+    if (sRow === dRRow && sCol === dRCol) {
+      const [rGRow, rGCol] = side === 1 ? [positiveNegativeConversion(right[0]), positiveNegativeConversion(right[1])] : left;
+
+      const rightRookRow = side === 0 ? 0 : 1;
+      const rightRookCol = side === 0 ? 0 : 7;
+
+      const rookGoSpecialRow = rGRow + rightRookRow;
+      const rookGoSpecialCol = rGCol + rightRookCol;
+
+      console.log(rookGoSpecialRow, rookGoSpecialCol);
+
+    }
+  }
+
+};
 
 const move = function ([row, col], [gRow, gCol]) {
   const pieceInfo = givePieceInfo([row, col]);
   if (!moveChecker([row, col], [gRow, gCol])) return false;
-	if(pieceInfo.name === "pawn") checkPawnSpecial([row, col], [gRow, gCol]);
+  if (pieceInfo.name === "pawn") checkPawnSpecial([row, col], [gRow, gCol]);
+  if (pieceInfo.name === "king") kingSpecialChecker([row, col], [gRow, gCol]);
   const { type } = pieceInfo;
   if (!(type === getTurn())) return false;
   if (containPiece([gRow, gCol])) deletePieceInfo([gRow, gCol]);

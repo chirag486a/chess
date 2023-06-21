@@ -162,6 +162,7 @@ const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) {
 		return;
 	}
 	grid[movdRow][movdCol] = { ...preObj };
+	grid[movdRow][movdCol].moved = true;
 	grid[preRow][preCol] = {};
 
 };
