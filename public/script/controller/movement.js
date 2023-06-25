@@ -1,20 +1,9 @@
-import { provideStep, givePieceInfo, pawnEatings, deleteRowCol, containPiece, provideSpecial, findKing, getTurn, updateTurn, deletePieceInfo } from "../model/data.js";
+import { provideStep, givePieceInfo, pawnEatings, deleteRowCol, containPiece, provideSpecial, findKing, getTurn, updateTurn, deletePieceInfo, updatePieceInfo } from "../model/data.js";
 import { move as send, deleteElement } from "../view/task/task.js";
 import { pinnedCheck, defendKing, chessCheck } from "./check.js";
 import { arrayConverter, positiveNegativeConversion, compareType } from "./util.js";
 
 
-
-
-const preparePawnCastling = function ([row, col]) {
-
-
-
-
-
-
-
-};
 
 const prepareKing = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
@@ -49,7 +38,6 @@ const prepareKing = function ([row, col], check) {
 
 
 
-  // if you want to check kings valid movement (possible move will ask for it)
   if (check) {
 
     if (pieceObj.moved === false) {
@@ -61,6 +49,8 @@ const prepareKing = function ([row, col], check) {
 
       const selectRightRook = givePieceInfo([rookRow, rightRookCol]);
       const selectLeftRook = givePieceInfo([rookRow, leftRookCol]);
+
+      console.log(selectRightRook, selectLeftRook);
 
       if (selectRightRook.moved === false) {
 
@@ -82,15 +72,14 @@ const prepareKing = function ([row, col], check) {
         const rContainPiece = containPiece([rRow, rCol]);
 
         if (sCheck && rCheck && !sContainPiece && !rContainPiece) {
-          if (type === "B") dArr.doubleRight = [sRow, sCol];
-          if (type === "W") {
+          if (type === "W") dArr.doubleRight = [sRow, sCol];
+          if (type === "B") {
             const wCRow = sRow;
             const wCCol = sCol + 1;
             if (!containPiece([wCRow, wCCol])) dArr.doubleRight = [sRow, sCol];
           }
         }
       }
-      console.log(dArr);
       if (selectLeftRook.moved === false) {
         const { doubleLeft } = provideSpecial("king");
         const [mRow, mCol] = doubleLeft;
@@ -110,29 +99,23 @@ const prepareKing = function ([row, col], check) {
         const lContainPiece = containPiece([lRow, lCol]);
 
         if (sCheck && lCheck && !sContainPiece && !lContainPiece) {
-          if (type === "W") dArr.doubleRight = [sRow, sCol];
-          if (type === "B") {
+          if (type === "B") dArr.doubleLeft = [sRow, sCol];
+          if (type === "W") {
             const wCRow = sRow;
             const wCCol = sCol + 1;
-            if (!containPiece([wCRow, wCCol])) dArr.doubleRight = [sRow, sCol];
+            if (!containPiece([wCRow, wCCol])) dArr.doubleLeft = [sRow, sCol];
           }
         }
 
       }
 
     }
-    console.log(dArr);
-    // chek is arr which return if there is check to king where the check is comming from;
     const chek = chessCheck([row, col], type);
     const keys = Object.keys(dArr);
     for (const key of keys) {
-      // if chek is empty array just don't do the loop
       if (chek[0] === undefined) break;
-      // its king move dir[key] at key direction
       if (typeof dArr[key][0] === "number") {
         const [ro, co] = dArr[key];
-        // this loop will check which direction is check is comming from
-        // if check is comming form top bottom possible move will get mutated
         for (const [row, col] of chek) {
           if (!(ro === row && co === col)) continue;
           let opposite;
@@ -158,7 +141,6 @@ const prepareKing = function ([row, col], check) {
     const pinnedArea = pinnedCheck(dArr, pieceObj.type);
     return pinnedArea;
   }
-  // if(check) return pinnedCheck(dArr, pieceObj.type);
 
   return dArr;
 
@@ -208,8 +190,6 @@ const preparePawn = function ([row, col], check) {
     if (!containPiece([fRow, fCol])) {
       obj = { ...obj, top: [fRow, fCol] };
     }
-    // can pass functionality
-    // code
 
   } catch (err) {
     console.log("Top Move");
@@ -329,7 +309,6 @@ const queenRookBishop = function ([row, col], name, side) {
     mRow = side === 0 ? positiveNegativeConversion(mRow) : mRow;
     mCol = side === 0 ? positiveNegativeConversion(mCol) : mCol;
     dArr[dir] = [];
-    // Reinitialize
     curRow = row;
     curCol = col;
 
@@ -387,12 +366,6 @@ const moves = function ([row, col], name, side, check) {
 
 
 
-
-/*
- * @param {Array} [row, col] row and column of asked piece 
- * @param {boolean} check wheather to check for attack to king or not
- * @returns {Array}
-*/
 const possibleMove = function ([row, col], check) {
   const pieceObj = givePieceInfo([row, col]);
   const pieceName = pieceObj.name;
@@ -461,57 +434,45 @@ const kingSpecialChecker = function ([row, col], [gRow, gCol]) {
 
   const moves = possibleMove([row, col], true);
   const { moved: kMoved } = pieceInfo;
-  const { type } = pieceInfo;
   const { upDown: side } = pieceInfo;
 
   if (kMoved === true) return false;
-  const kSpecial = provideSpecial("king");
   const rSpecial = provideSpecial("rook");
 
-  const { doubleRight, doubleLeft } = kSpecial;
   const { left, right } = rSpecial;
 
-  const { doubleLeftMove, doubleRightMove } = moves;
+  const { doubleLeft: doubleLeftMove, doubleRight: doubleRightMove } = moves;
 
-  if (doubleLeft !== undefined) {
-    const [dLRow, dLCol] = doubleLeftMove;
-    const sRow = side === 1 ? 7 : 0;
-    const sCol = side === 0 ? positiveNegativeConversion(doubleLeft[1]) + gCol : doubleLeft[1] + gCol;
+  if (doubleLeftMove !== undefined) {
+    const [kingDestinationRow, kingDestinationCol] = doubleLeftMove;
 
-    if (sRow === dLRow && sCol === dLCol) {
-      // left
-      // rook Go Row
-      // rook Go Col
-      const [rGRow, rGCol] = side === 1 ? [positiveNegativeConversion(left[0]), positiveNegativeConversion(left[1])] : left;
-      const leftRookRow = side === 0 ? 0 : 7;
-      const leftRookCol = side === 0 ? 7 : 0;
+    if (gRow === kingDestinationRow && gCol === kingDestinationCol) {
 
-      const rookGoSpecialRow = rGRow + leftRookRow;
-      const rookGoSpecialCol = rGCol + leftRookCol;
+      const rookRow = row;
+      const rookCol = side === 0 ? 7 : 0;
 
-      console.log(rookGoSpecialCol, rookGoSpecialCol);
+      const rookSpecialRow = row;
+      const rookSpecialCol = side === 1 ? left[1] + rookCol : right[1] + rookCol;
 
+     console.log(rookSpecialRow, rookSpecialCol); 
+      updatePieceInfo([rookRow, rookCol], [rookSpecialRow, rookSpecialCol]);
+      send([rookRow, rookCol], [rookSpecialRow, rookSpecialCol]);
     }
 
   }
-  if (doubleRight !== undefined) {
-    // right
-    // rook go Row
-    // rook Go Col
-    const [dRRow, dRCol] = doubleRightMove;
-    const sRow = side === 1 ? 7 : 0;
-    const sCol = side === 0 ? positiveNegativeConversion(doubleRight[1]) + gCol : doubleRight[1] + gCol;
-    if (sRow === dRRow && sCol === dRCol) {
-      const [rGRow, rGCol] = side === 1 ? [positiveNegativeConversion(right[0]), positiveNegativeConversion(right[1])] : left;
+  if (doubleRightMove !== undefined) {
+   const [kingDestinationRow, kingDestinationCol] = doubleRightMove;
 
-      const rightRookRow = side === 0 ? 0 : 1;
-      const rightRookCol = side === 0 ? 0 : 7;
+    if (gRow === kingDestinationRow && gCol === kingDestinationCol) {
 
-      const rookGoSpecialRow = rGRow + rightRookRow;
-      const rookGoSpecialCol = rGCol + rightRookCol;
+      const rookRow = row;
+      const rookCol = side === 0 ? 0 : 7;
 
-      console.log(rookGoSpecialRow, rookGoSpecialCol);
+      const rookSpecialRow = row;
+      const rookSpecialCol = side === 1 ? right[1] + rookCol : left[1] + rookCol;
 
+      updatePieceInfo([rookRow, rookCol], [rookSpecialRow, rookSpecialCol]);
+      send([rookRow, rookCol], [rookSpecialRow, rookSpecialCol]);
     }
   }
 
@@ -521,10 +482,10 @@ const move = function ([row, col], [gRow, gCol]) {
   const pieceInfo = givePieceInfo([row, col]);
   if (!moveChecker([row, col], [gRow, gCol])) return false;
   if (pieceInfo.name === "pawn") checkPawnSpecial([row, col], [gRow, gCol]);
-  if (pieceInfo.name === "king") kingSpecialChecker([row, col], [gRow, gCol]);
   const { type } = pieceInfo;
   if (!(type === getTurn())) return false;
   if (containPiece([gRow, gCol])) deletePieceInfo([gRow, gCol]);
+  if (pieceInfo.name === "king") kingSpecialChecker([row, col], [gRow, gCol]);
   send([row, col], [gRow, gCol]);
   updateTurn(type === "W" ? "B" : "W");
   deleteRowCol();

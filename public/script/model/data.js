@@ -1,6 +1,3 @@
-// localstorege
-const lId = "clicked";
-const localStorageMovableId = "movable";
 
 let ROWS = 8;
 let COLUMNS = 8;
@@ -32,11 +29,11 @@ const createPieceInfo = function (white_position, black_position) {
 	const rightKnight = grid[white_position][6];
 	rightKnight.name = "knight";
 
-	const king = grid[white_position][3];
+	const king = grid[white_position][4];
 	king.name = "king";
 	king.moved = false;
 
-	const queen = grid[white_position][4];
+	const queen = grid[white_position][3];
 	queen.name = "queen";
 
 	const rightBishop = grid[white_position][5];
@@ -45,7 +42,7 @@ const createPieceInfo = function (white_position, black_position) {
 	const leftBishop = grid[white_position][2];
 	leftBishop.name = "bishop";
 
-	// white pieces done now below copy property of white for black with some property changed
+	// white pieces done now below copy property to black from white. 
 	for (let i = 0; i < COLUMNS; i++) {
 		grid[black_position][i].name = grid[white_position][i].name;
 		grid[black_position][i].defended = false;
@@ -56,17 +53,6 @@ const createPieceInfo = function (white_position, black_position) {
 		grid[black_position][i].upDown = black_position === 7 ? 1 : 0;
 		grid[white_position][i].upDown = white_position === 0 ? 0 : 1;
 		const pName = grid[black_position][i].name;
-		if (pName === "knight" || pName === "rook" || pName === "bishop") {
-			if (i < 3) {
-				grid[black_position][i].side = "left";
-				grid[white_position][i].side = "left";
-
-			}
-			if (i > 3) {
-				grid[black_position][i].side = "right";
-				grid[white_position][i].side = "right";
-			}
-		}
 		const six = white_position === 7 ? 6 : 1;
 		const one = black_position === 0 ? 1 : 6;
 
@@ -94,7 +80,6 @@ const createPieceInfo = function (white_position, black_position) {
 console.log(grid);
 const givePieceInfo = function ([row, col]) {
 	try {
-		//	console.log((row >= 0 && row <= 7 && col >= 0 && col <= 7));
 		if (!((row >= 0 && row <= 7) && (col >= 0 && col <= 7)))
 			throw new Error("OUT OF BOARD");
 		else return grid[row][col];
@@ -123,7 +108,6 @@ const findKing = function (type) {
 };
 
 
-// UPDATE GRID
 const king = function ([preRow, preCol], [movdRow, movdCol]) {
 	grid[movdRow][movdCol] = JSON.parse(JSON.stringify(grid[preRow][preCol]));
 	grid[preRow][preCol] = {};
@@ -167,7 +151,6 @@ const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) {
 
 };
 
-// ATTACKED PIECES
 const deletedPiece = {
 	W: [],
 	B: [],
@@ -204,18 +187,16 @@ const giveGrid = function () {
 
 
 // Valid data
-
 const top = [-1, 0];
 const doubleTop = [-2, 0];
 const bottom = [1, 0];
-const double_bottom = [2, 0];
 
 const right = [0, 1];
 const doubleRight = [0, 2];
+const tripleRight = [0, 3];
 
 const left = [0, -1];
 const doubleLeft = [0, -2];
-const tripleLeft = [0, -3];
 
 const topRight = [-1, 1];
 const bottomRight = [1, 1];
@@ -341,8 +322,8 @@ const special = {
 		doubleLeft,
 	},
 	rook: {
-		left: doubleRight,
-		right: tripleLeft
+		left: tripleRight,
+		right: doubleLeft
 	},
 	pawn: {
 		 doubleTop
@@ -355,7 +336,6 @@ const provideSpecial = function (name) {
 	return special[name];
 }
 
-// export as getStep
 const provideStep = function (name) {
 	if (name === "knight" || name === "pawn" || name === "king") {
 		return valid[name];
@@ -372,7 +352,6 @@ const provideStep = function (name) {
 
 
 
-// Whose turn is it
 let turn = "W";
 const updateTurn = function(updatedTurn) {
 	turn = updatedTurn;
