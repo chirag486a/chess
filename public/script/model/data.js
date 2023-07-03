@@ -77,7 +77,9 @@ const createPieceInfo = function (white_position, black_position) {
 	}
 
 };
-console.log(grid);
+
+
+
 const givePieceInfo = function ([row, col]) {
 	try {
 		if (!((row >= 0 && row <= 7) && (col >= 0 && col <= 7)))
@@ -110,7 +112,9 @@ const findKing = function (type) {
 
 const king = function ([preRow, preCol], [movdRow, movdCol]) {
 	grid[movdRow][movdCol] = JSON.parse(JSON.stringify(grid[preRow][preCol]));
+	grid[movdRow][movdCol].moved = true;
 	grid[preRow][preCol] = {};
+
 	return;
 };
 
@@ -134,21 +138,26 @@ const pawn = function ([preRow, preCol], [movdRow, movdCol]) {
 	return;
 };
 
-const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) {
-	let preObj = grid[preRow][preCol];
-	const preName = preObj.name;
-	if (preName === "pawn") {
-		pawn([preRow, preCol], [movdRow, movdCol]);
-		return;
+const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) { 
+	try {
+		let preObj = grid[preRow][preCol];
+		const preName = preObj.name;
+		if (preName === "pawn") {
+			pawn([preRow, preCol], [movdRow, movdCol]);
+			return;
+		}
+		if (preName === "king") {
+			king([preRow, preCol], [movdRow, movdCol]);
+			return;
+		}
+		
+		grid[movdRow][movdCol] = { ...preObj };
+		grid[movdRow][movdCol].moved = true;
+		grid[preRow][preCol] = {};
+		return true;
+	} catch (err) {
+		return false
 	}
-	if (preName === "king") {
-		king([preRow, preCol], [movdRow, movdCol]);
-		return;
-	}
-	grid[movdRow][movdCol] = { ...preObj };
-	grid[movdRow][movdCol].moved = true;
-	grid[preRow][preCol] = {};
-
 };
 
 const deletedPiece = {

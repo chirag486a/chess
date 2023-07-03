@@ -1,6 +1,6 @@
 "use script";
 // data
-import { givePieceInfo, updateRowCol, provideRowCol, deleteRowCol, updatePieceInfo, createPieceInfo, containPiece } from "../model/data.js";
+import { givePieceInfo, updateRowCol, provideRowCol, deleteRowCol, updatePieceInfo, createPieceInfo, containPiece, getTurn } from "../model/data.js";
 // view
 import { designBoard, piecePlace } from "../view/design/design.js";
 import { boardListener as listenToBoard } from "../view/task/handler.js";
@@ -31,58 +31,65 @@ const unLight = function ([pRow, pCol]) {
 	deleteRowCol();
 };
 
-const checkEat = function(preRowCol, [gRow, gCol]) {
-	if(preRowCol === null) return;
-	const [row, col] = preRowCol;  
+const checkEat = function (preRowCol, [gRow, gCol]) {
+	if (preRowCol === null) return false;
+	const [row, col] = preRowCol;
 	const pieceMoves = possibleMove([row, col], true);
-	
+
 	const curPieceInfo = givePieceInfo([row, col]);
-	const goPieceInfo = givePieceInfo ([gRow, gCol]);
+	const goPieceInfo = givePieceInfo([gRow, gCol]);
 
 
-	
-	if(curPieceInfo.type === goPieceInfo.type) return false;
+
+	if (curPieceInfo.type === goPieceInfo.type) return false;
 
 	const pieceArr = arrayConverter(pieceMoves);
 
-	if(pieceArr[0] === undefined) return false;
-	for(const [row, col] of pieceArr) {
-		if(row === gRow && col === gCol) return true;
+	if (pieceArr[0] === undefined) return false;
+	for (const [row, col] of pieceArr) {
+		if (row === gRow && col === gCol) return true;
 	}
-	return false
-}
+	return false;
+};
 
 
-const onClick = function (ev) {
-	const element = ev.target;
-	const [row, col] = retriveRowCol(element);
+const onClick = function ([row, col]) {
 	const preRowCol = provideRowCol();
 	const contains = containPiece([row, col]);
-	const pieceInfo = givePieceInfo([row, col]);
-	const {type} = pieceInfo;
-	
-	
+
 	if (contains) {
-		if (preRowCol !== null && preRowCol[0] === row && preRowCol[1] === col) {
-			unLight([row, col]);
-			return;
-		}
-		if(preRowCol !== null) {
-		 unLight(preRowCol);
-			const canEat = checkEat(preRowCol, [row, col]);
-			if(canEat){
-				if(move(preRowCol, [row, col])) {
-						updatePieceInfo(preRowCol, [row, col]);
-						return;
-				}
+		if (preRowCol !== null) {
+
+			if (preRowCol[0] === row && preRowCol[1] === col) {
+				unLight(preRowCol);
+				return;
 			}
+			const canEat = checkEat(preRowCol, [row, col]);
+			if (canEat) {
+				unLight(preRowCol);
+				if(move(preRowCol, [row, col])) updatePieceInfo(preRowCol, [row, col]);
+				return;
+			}
+			const pieceInfo = givePieceInfo([row, col]);
+			const { type } = pieceInfo;
+			if (type === getTurn()) {
+				unLight(preRowCol);
+				light([row, col]);
+			}
+			return;
+		} else {
+			const pieceInfo = givePieceInfo([row, col]);
+			const { type } = pieceInfo;
+			if (type !== getTurn()) return;
+
+			light([row, col]);
+
+
 		}
-		if(!checkEat(preRowCol, [row, col])) light([row, col]);
-	//	chessCheck([row, col]);
 	} else if (!contains) {
 		if (preRowCol === null) return;
 		unLight(preRowCol);
-		if(move(preRowCol, [row, col])) updatePieceInfo(preRowCol, [row, col]);
+		if (move(preRowCol, [row, col])) updatePieceInfo(preRowCol, [row, col]);
 	}
 };
 
@@ -92,6 +99,7 @@ const clickZone = function () {
 	listenToBoard(onClick);
 };
 
+// client
 const piecePlacement = function () {
 	for (let i = 0; i < 8; i++) {
 		for (let j = 0; j < 8; j++) {
@@ -107,7 +115,7 @@ const piecePlacement = function () {
 
 // INIT function
 const init = function () {
-	createPieceInfo(7, 0);
+	createPieceInfo(0, 7);
 	designBoard();
 	clickZone();
 	piecePlacement();

@@ -50,7 +50,6 @@ const prepareKing = function ([row, col], check) {
       const selectRightRook = givePieceInfo([rookRow, rightRookCol]);
       const selectLeftRook = givePieceInfo([rookRow, leftRookCol]);
 
-      console.log(selectRightRook, selectLeftRook);
 
       if (selectRightRook.moved === false) {
 
@@ -147,7 +146,8 @@ const prepareKing = function ([row, col], check) {
 
 };
 const pawnEats = function ([row, col]) {
-  const { upDown } = givePieceInfo([row, col]);
+  const pieceInfo = givePieceInfo([row, col]);
+  const { upDown } = pieceInfo;
   const side = upDown;
   const eatObj = pawnEatings([row, col]);
   const eatings = Object.keys(eatObj);
@@ -158,6 +158,7 @@ const pawnEats = function ([row, col]) {
     let gCol = side === 0 ? positiveNegativeConversion(eatObj[eatDir][1]) + col : eatObj[eatDir][1] + col;
     try {
       if (((gRow >= 0 && gRow <= 7) && (gCol >= 0 && gCol <= 7))) {
+        if (pieceInfo.canPass === true && (eatDir === "left" || eatDir === "right")) return 
 
         eat[eatDir] = [gRow, gCol];
       }
@@ -396,7 +397,6 @@ const deletePiece = function ([row, col]) {
 
 const checkPawnSpecial = function ([row, col], [gRow, gCol]) {
 
-
   const pieceInfo = givePieceInfo([row, col]);
   pieceInfo.canPass = false;
   const { upDown: side } = pieceInfo;
@@ -417,10 +417,9 @@ const checkPawnSpecial = function ([row, col], [gRow, gCol]) {
 
   if (col !== gCol) {
     if (!containPiece([gRow, gCol])) {
-      const deleteRow = side === 0 ? +1 + gRow : 1 + gRow;
+      const deleteRow = row;
       const deleteCol = gCol;
 
-      console.log(deleteRow, deleteCol);
       deletePiece([deleteRow, deleteCol]);
       deleteElement([deleteRow, deleteCol]);
 
@@ -454,14 +453,14 @@ const kingSpecialChecker = function ([row, col], [gRow, gCol]) {
       const rookSpecialRow = row;
       const rookSpecialCol = side === 1 ? left[1] + rookCol : right[1] + rookCol;
 
-     console.log(rookSpecialRow, rookSpecialCol); 
+      console.log(rookSpecialRow, rookSpecialCol);
       updatePieceInfo([rookRow, rookCol], [rookSpecialRow, rookSpecialCol]);
       send([rookRow, rookCol], [rookSpecialRow, rookSpecialCol]);
     }
 
   }
   if (doubleRightMove !== undefined) {
-   const [kingDestinationRow, kingDestinationCol] = doubleRightMove;
+    const [kingDestinationRow, kingDestinationCol] = doubleRightMove;
 
     if (gRow === kingDestinationRow && gCol === kingDestinationCol) {
 

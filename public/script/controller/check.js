@@ -1,6 +1,6 @@
 import { givePieceInfo, findKing, containPiece } from "../model/data.js";
 import { possibleMove, pawnEats } from "./movement.js";
-import { compareType } from "./util.js";
+
 const getPieceMove = function ([row, col]) {
 	const { name } = givePieceInfo([row, col]);
 	if (name === "pawn") {
@@ -98,7 +98,6 @@ const chessCheck = function ([kRow, kCol], type) {
 					for (const [r, c] of data) {
 						if (r === kRow && c === kCol) {
 							data.push([row, col]);
-							
 							return data; 
 						};
 					}
@@ -111,7 +110,8 @@ const chessCheck = function ([kRow, kCol], type) {
 						const givingArr = [];
 						givingArr.push([row, col]);
 						givingArr.push(data);
-						return data
+						
+						return givingArr
 					}
 					continue;
 				}
