@@ -1,6 +1,6 @@
 import { provideStep, givePieceInfo, pawnEatings, deleteRowCol, containPiece, provideSpecial, findKing, getTurn, updateTurn, deletePieceInfo, updatePieceInfo } from "../model/data.js";
 import { move as send, deleteElement } from "../view/task/task.js";
-import { pinnedCheck, defendKing, chessCheck } from "./check.js";
+import { pinnedCheck, defendKing, chessCheck, shouldPieceMove } from "./check.js";
 import { arrayConverter, positiveNegativeConversion, compareType } from "./util.js";
 
 
@@ -116,6 +116,7 @@ const prepareKing = function ([row, col], check) {
       if (typeof dArr[key][0] === "number") {
         const [ro, co] = dArr[key];
         for (const [row, col] of chek) {
+
           if (!(ro === row && co === col)) continue;
           let opposite;
           switch (key) {
@@ -138,6 +139,7 @@ const prepareKing = function ([row, col], check) {
       }
     }
     const pinnedArea = pinnedCheck(dArr, pieceObj.type);
+  
     return pinnedArea;
   }
 
@@ -158,7 +160,7 @@ const pawnEats = function ([row, col]) {
     let gCol = side === 0 ? positiveNegativeConversion(eatObj[eatDir][1]) + col : eatObj[eatDir][1] + col;
     try {
       if (((gRow >= 0 && gRow <= 7) && (gCol >= 0 && gCol <= 7))) {
-        if (pieceInfo.canPass === true && (eatDir === "left" || eatDir === "right")) return 
+        if (pieceInfo.canPass === true && (eatDir === "left" || eatDir === "right")) return;
 
         eat[eatDir] = [gRow, gCol];
       }
@@ -372,6 +374,26 @@ const possibleMove = function ([row, col], check) {
   const pieceName = pieceObj.name;
   const side = pieceObj.upDown;
   const step = moves([row, col], pieceName, side, check);
+  
+  const stepKeys = Object.keys(step);
+
+
+
+  if (check === false) return step;
+
+  for (const dir of stepKeys) {
+    if (Array.isArray(step[dir][0])) {
+      for (const [pRow, pCol] of step[dir]) {
+        const yesNo = shouldPieceMove([row, col], [pRow, pCol]);
+        console.log(yesNo);
+      }
+    }
+    if (typeof step[dir][0] === "number") {
+      const [pRow, pCol] = step[dir];
+      const yesNo = shouldPieceMove([row, col], [pRow, pCol])
+      console.log(yesNo);
+    }
+  }
   return step;
 };
 

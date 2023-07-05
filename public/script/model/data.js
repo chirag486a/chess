@@ -96,15 +96,19 @@ const containPiece = function ([row, col]) {
 		if (pieceData.name !== undefined) return true;
 		else return false;
 	} catch (err) {
-		throw Error(err.message)
+		throw Error(err.message);
 	}
 
 };
 const findKing = function (type) {
 	for (let i = 0; i <= 7; i++) {
 		for (let j = 0; j <= 7; j++) {
-			const pieceInFo = givePieceInfo([i, j])
-			if (pieceInFo.name === "king" && pieceInFo.type === type) return [i, j];
+			const pieceInfo = givePieceInfo([i, j]);
+
+			if (pieceInfo.name === "king" && pieceInfo.type === type) {
+				return [i, j];
+
+			}
 		}
 	}
 };
@@ -119,15 +123,15 @@ const king = function ([preRow, preCol], [movdRow, movdCol]) {
 };
 
 const pawn = function ([preRow, preCol], [movdRow, movdCol]) {
-	
-	for(let i = 0; i <= 7; i++) {
-		for(let j = 0; j <= 7; j++) {
 
-			const pieceInfo = givePieceInfo([i,j]);
-			if(pieceInfo.name !== "pawn") continue;
-			
-			if(i === preRow && j === preCol) continue;
-			
+	for (let i = 0; i <= 7; i++) {
+		for (let j = 0; j <= 7; j++) {
+
+			const pieceInfo = givePieceInfo([i, j]);
+			if (pieceInfo.name !== "pawn") continue;
+
+			if (i === preRow && j === preCol) continue;
+
 			pieceInfo.canPass = false;
 
 		}
@@ -138,7 +142,7 @@ const pawn = function ([preRow, preCol], [movdRow, movdCol]) {
 	return;
 };
 
-const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) { 
+const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) {
 	try {
 		let preObj = grid[preRow][preCol];
 		const preName = preObj.name;
@@ -150,30 +154,38 @@ const updatePieceInfo = function ([preRow, preCol], [movdRow, movdCol]) {
 			king([preRow, preCol], [movdRow, movdCol]);
 			return;
 		}
-		
+
 		grid[movdRow][movdCol] = { ...preObj };
 		grid[movdRow][movdCol].moved = true;
 		grid[preRow][preCol] = {};
 		return true;
 	} catch (err) {
-		return false
+		return false;
 	}
+};
+
+const updatePieceInfoCheck = function ([row, col], [gRow, gCol]) {
+	let tempObj = grid[row][col];
+
+	grid[gRow][gCol] = { ...tempObj };
+	grid[row][col] = {};
+
 };
 
 const deletedPiece = {
 	W: [],
 	B: [],
-}
+};
 
-const deletePieceInfo = function([row, col]) {
+const deletePieceInfo = function ([row, col]) {
 
 	const pieceInfo = givePieceInfo([row, col]);
 
-	deletedPiece[pieceInfo.type]  = {... pieceInfo}	
+	deletedPiece[pieceInfo.type] = { ...pieceInfo };
 
 	grid[row][col] = {};
 
-}
+};
 
 
 // Row & Col which was selected previously
@@ -335,15 +347,15 @@ const special = {
 		right: doubleLeft
 	},
 	pawn: {
-		 doubleTop
+		doubleTop
 	}
 };
 
 
 const provideSpecial = function (name) {
-	if(typeof special[name] !== "object") throw new Error(`No Special Moves For ${name}`)
+	if (typeof special[name] !== "object") throw new Error(`No Special Moves For ${name}`);
 	return special[name];
-}
+};
 
 const provideStep = function (name) {
 	if (name === "knight" || name === "pawn" || name === "king") {
@@ -362,12 +374,12 @@ const provideStep = function (name) {
 
 
 let turn = "W";
-const updateTurn = function(updatedTurn) {
+const updateTurn = function (updatedTurn) {
 	turn = updatedTurn;
-} 
-const getTurn = function() {
+};
+const getTurn = function () {
 	return turn;
-}
+};
 
 
 
@@ -387,5 +399,6 @@ export {
 	findKing,
 	getTurn,
 	updateTurn,
-	deletePieceInfo
+	deletePieceInfo,
+	updatePieceInfoCheck
 };

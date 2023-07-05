@@ -1,4 +1,4 @@
-import { givePieceInfo, findKing, containPiece } from "../model/data.js";
+import { findKing, givePieceInfo, updatePieceInfo, updatePieceInfoCheck } from "../model/data.js";
 import { possibleMove, pawnEats } from "./movement.js";
 
 const getPieceMove = function ([row, col]) {
@@ -98,20 +98,20 @@ const chessCheck = function ([kRow, kCol], type) {
 					for (const [r, c] of data) {
 						if (r === kRow && c === kCol) {
 							data.push([row, col]);
-							return data; 
+							return data;
 						};
 					}
 					continue;
 				}
 				if (typeof data[0] === "number") {
 					const [r, c] = data;
-					
+
 					if (kRow === r && kCol === c) {
 						const givingArr = [];
 						givingArr.push([row, col]);
 						givingArr.push(data);
-						
-						return givingArr
+
+						return givingArr;
 					}
 					continue;
 				}
@@ -121,7 +121,25 @@ const chessCheck = function ([kRow, kCol], type) {
 	return [];
 };
 
+// when certain piece is moved will king get checked
+const shouldPieceMove = function ([row, col], [gRow, gCol]) {
 
+	const pieceInfo = givePieceInfo([row, col]);
 
-export { pinnedCheck, defendKing, chessCheck };
+	const { type } = pieceInfo;
 
+	const [kRow, kCol] = findKing(type);
+
+	console.log(kRow, kCol);
+
+	updatePieceInfoCheck([row, col], [gRow, gCol]);
+	const isKingCheck = chessCheck([kRow, kCol], type);
+	updatePieceInfoCheck([gRow, gCol], [row, col]);
+	if (isKingCheck[0] !== undefined) {
+		return false;
+	}
+
+	return true;
+};
+
+export { pinnedCheck, defendKing, chessCheck, shouldPieceMove };
