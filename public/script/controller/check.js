@@ -130,8 +130,6 @@ const shouldPieceMove = function ([row, col], [gRow, gCol]) {
 
 	const [kRow, kCol] = findKing(type);
 
-	console.log(kRow, kCol);
-
 	updatePieceInfoCheck([row, col], [gRow, gCol]);
 	const isKingCheck = chessCheck([kRow, kCol], type);
 	updatePieceInfoCheck([gRow, gCol], [row, col]);

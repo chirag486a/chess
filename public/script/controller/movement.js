@@ -381,20 +381,24 @@ const possibleMove = function ([row, col], check) {
 
   if (check === false) return step;
 
+  const stepEdit = {}
   for (const dir of stepKeys) {
     if (Array.isArray(step[dir][0])) {
+      stepEdit[dir] = []
       for (const [pRow, pCol] of step[dir]) {
         const yesNo = shouldPieceMove([row, col], [pRow, pCol]);
-        console.log(yesNo);
+        if (yesNo === false) continue;
+        stepEdit[dir].push([pRow, pCol]);
       }
     }
     if (typeof step[dir][0] === "number") {
       const [pRow, pCol] = step[dir];
       const yesNo = shouldPieceMove([row, col], [pRow, pCol])
-      console.log(yesNo);
+      if (yesNo === true) stepEdit[dir] = [pRow, pCol];
     }
   }
-  return step;
+  console.log(stepEdit);
+  return stepEdit;
 };
 
 const moveChecker = function ([row, col], [gRow, gCol]) {
@@ -508,6 +512,7 @@ const move = function ([row, col], [gRow, gCol]) {
   if (containPiece([gRow, gCol])) deletePieceInfo([gRow, gCol]);
   if (pieceInfo.name === "king") kingSpecialChecker([row, col], [gRow, gCol]);
   send([row, col], [gRow, gCol]);
+  console.log(gRow, gCol);
   updateTurn(type === "W" ? "B" : "W");
   deleteRowCol();
   return true;
