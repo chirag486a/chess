@@ -1,6 +1,6 @@
 # ♗ Chess ♗
 
-For now, the game is partially playable, but there's more to come! 🎮
+For now, the game is partially playable, but there's more to come!
 
 ## Made with ❤️
 - 🖥️ Javascript 
