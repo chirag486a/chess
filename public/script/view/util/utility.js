@@ -50,6 +50,8 @@ const listen = function (type = "click", el, func) {
     func(ev);
   });
 };
+
+// util
 export {
   createImgElement,
   addClass,

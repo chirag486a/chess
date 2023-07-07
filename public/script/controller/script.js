@@ -2,10 +2,10 @@
 // data
 import { givePieceInfo, updateRowCol, provideRowCol, deleteRowCol, updatePieceInfo, createPieceInfo, containPiece, getTurn } from "../model/data.js";
 // view
-import { designBoard, piecePlace } from "../view/design/design.js";
+import { designBoard } from "../view/design/design.js";
 import { boardListener as listenToBoard } from "../view/task/handler.js";
 import { retriveRowCol } from "../view/util/utility.js";
-import { moveOnOffLight, clickLight } from "../view/task/task.js";
+import { moveOnOffLight, clickLight, piecePlace } from "../view/task/task.js";
 // control/movement
 import { move, possibleMove } from "./movement.js";
 // utility
@@ -67,7 +67,7 @@ const onClick = function ([row, col]) {
 			const canEat = checkEat(preRowCol, [row, col]);
 			if (canEat) {
 				unLight(preRowCol);
-				if(move(preRowCol, [row, col])) updatePieceInfo(preRowCol, [row, col]);
+				if (move(preRowCol, [row, col])) updatePieceInfo(preRowCol, [row, col]);
 				return;
 			}
 			const pieceInfo = givePieceInfo([row, col]);

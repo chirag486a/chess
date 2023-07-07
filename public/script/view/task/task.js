@@ -1,5 +1,6 @@
 import { board } from "./selects.js";
-import { appendEl, lightOff, lightOn, selectZone } from "../util/utility.js";
+import { appendEl, lightOff, lightOn, selectZone, addressify, blankHTML, createImgElement } from "../util/utility.js";
+import { IMAGE_DIRECTORY } from "../../env.js";
 
 const moveOnOffLight = function (movableArr, onOff) {
   try {
@@ -48,6 +49,15 @@ const deleteElement = function([row, col]){
 	selectEl.innerHTML = "";	
 
 }
+const piecePlace = function ([row, col], name, type) {
+  const address = addressify(IMAGE_DIRECTORY, type, name);
+  const zone = selectZone([row, col]);
+  blankHTML(zone);
+  const el = createImgElement(address);
+  appendEl(zone, el);
+};
+
+
 
 
 export {
@@ -57,4 +67,5 @@ export {
   moveOnOffLight,
   clickLight,
 	deleteElement,
+  piecePlace
 };
