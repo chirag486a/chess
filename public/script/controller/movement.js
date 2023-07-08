@@ -139,7 +139,7 @@ const prepareKing = function ([row, col], check) {
       }
     }
     const pinnedArea = pinnedCheck(dArr, pieceObj.type);
-  
+
     return pinnedArea;
   }
 
@@ -154,8 +154,7 @@ const pawnEats = function ([row, col]) {
   const eatObj = pawnEatings([row, col]);
   const eatings = Object.keys(eatObj);
   const eat = {};
-  eatings.forEach(eatDir => {
-
+  const checkIfPawnCanEat = function (eatDir) {
     let gRow = side === 0 ? positiveNegativeConversion(eatObj[eatDir][0]) + row : eatObj[eatDir][0] + row;
     let gCol = side === 0 ? positiveNegativeConversion(eatObj[eatDir][1]) + col : eatObj[eatDir][1] + col;
     try {
@@ -164,12 +163,13 @@ const pawnEats = function ([row, col]) {
 
         eat[eatDir] = [gRow, gCol];
       }
-
     } catch (err) {
       return;
     }
 
-  });
+
+  };
+  eatings.forEach(checkIfPawnCanEat);
 
   return eat;
 };
@@ -269,7 +269,8 @@ const prepareKnight = function ([row, col], check) {
   const { step } = provideStep(pieceObj.name);
   const extracting = Object.keys(step);
   const dArr = {};
-  extracting.forEach(dir => {
+
+  const knightMoves = function (dir) {
     let [mRow, mCol] = step[dir];
     mRow = side === 0 ? positiveNegativeConversion(mRow) : mRow;
     mCol = side === 0 ? positiveNegativeConversion(mCol) : mCol;
@@ -287,7 +288,8 @@ const prepareKnight = function ([row, col], check) {
     } catch (err) {
       return;
     }
-  });
+  };
+  extracting.forEach(knightMoves);
 
   if (!check) return dArr;
   const type = pieceObj.type;
@@ -307,7 +309,8 @@ const queenRookBishop = function ([row, col], name, side) {
   const dArr = {};
   const { direction } = provideStep(name);
   const extracting = Object.keys(direction);
-  extracting.forEach(dir => {
+
+  const movesPreparer = function (dir) {
     let [mRow, mCol] = direction[dir];
     mRow = side === 0 ? positiveNegativeConversion(mRow) : mRow;
     mCol = side === 0 ? positiveNegativeConversion(mCol) : mCol;
@@ -319,9 +322,10 @@ const queenRookBishop = function ([row, col], name, side) {
     curCol += mCol;
     while (true) {
       try {
-        if (containPiece([curRow, curCol])) {
-          const trfa = compareType([curRow, curCol], [row, col]);
-          if (!trfa) {
+        const isPieceThere = containPiece([curRow, curCol]);
+        if (isPieceThere) {
+          const matched = compareType([curRow, curCol], [row, col]);
+          if (!matched) {
             dArr[dir].push([curRow, curCol]);
             break;
           }
@@ -335,7 +339,8 @@ const queenRookBishop = function ([row, col], name, side) {
       }
     }
 
-  });
+  }
+  extracting.forEach(movesPreparer);
 
   return dArr;
 };
@@ -374,17 +379,17 @@ const possibleMove = function ([row, col], check) {
   const pieceName = pieceObj.name;
   const side = pieceObj.upDown;
   const step = moves([row, col], pieceName, side, check);
-  
+
   const stepKeys = Object.keys(step);
 
 
 
   if (check === false) return step;
 
-  const stepEdit = {}
+  const stepEdit = {};
   for (const dir of stepKeys) {
     if (Array.isArray(step[dir][0])) {
-      stepEdit[dir] = []
+      stepEdit[dir] = [];
       for (const [pRow, pCol] of step[dir]) {
         const yesNo = shouldPieceMove([row, col], [pRow, pCol]);
         if (yesNo === false) continue;
@@ -393,7 +398,7 @@ const possibleMove = function ([row, col], check) {
     }
     if (typeof step[dir][0] === "number") {
       const [pRow, pCol] = step[dir];
-      const yesNo = shouldPieceMove([row, col], [pRow, pCol])
+      const yesNo = shouldPieceMove([row, col], [pRow, pCol]);
       if (yesNo === true) stepEdit[dir] = [pRow, pCol];
     }
   }

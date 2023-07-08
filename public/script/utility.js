@@ -6,4 +6,11 @@ const nestLoop = function (handler) {
   }
 };
 
-export { nestLoop };
+const objLoop = function (obj, handler) {
+  const keys = Object.keys(obj)
+  for (const key of keys) {
+    handler([key])
+  }
+}
+
+export { nestLoop, objLoop };

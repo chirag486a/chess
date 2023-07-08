@@ -10,6 +10,7 @@ import { moveOnOffLight, clickLight, piecePlace } from "../view/task/task.js";
 import { move, possibleMove } from "./movement.js";
 // utility
 import { arrayConverter } from "./util.js";
+import { nestLoop } from "../utility.js";
 
 
 const light = function ([row, col]) {
@@ -32,7 +33,6 @@ const unLight = function ([pRow, pCol]) {
 };
 
 const checkEat = function (preRowCol, [gRow, gCol]) {
-	if (preRowCol === null) return false;
 	const [row, col] = preRowCol;
 	const pieceMoves = possibleMove([row, col], true);
 
@@ -52,44 +52,43 @@ const checkEat = function (preRowCol, [gRow, gCol]) {
 	return false;
 };
 
+const runOnPieceClicked = function (preRowCol, [row, col]) {
+	const previouslyClicked = preRowCol;
+	const willGo = [row, col];
+	if (previouslyClicked !== null) {
+		const pieceInfo = givePieceInfo([row, col]);
+		const { type } = pieceInfo;
+		if (type !== getTurn()) return;
+		unLight(previouslyClicked);
+		light([row, col]);
+		if (preRowCol[0] === row && preRowCol[1] === col) {
+			unLight(preRowCol);
+			return;
+		}
+		const canEat = checkEat(previouslyClicked, willGo);
+		if (canEat) {
+			unLight(previouslyClicked);
+			if (move(previouslyClicked, willGo)) updatePieceInfo(previouslyClicked, willGo);
+			return;
+		}
+	} else {
+		const pieceInfo = givePieceInfo([row, col]);
+		const { type } = pieceInfo;
+		if (type !== getTurn()) return;
+		light([row, col]);
+	}
+};
 
 const onClick = function ([row, col]) {
-	const preRowCol = provideRowCol();
+	const previouslyClicked = provideRowCol();
 	const contains = containPiece([row, col]);
 
 	if (contains) {
-		if (preRowCol !== null) {
-
-			if (preRowCol[0] === row && preRowCol[1] === col) {
-				unLight(preRowCol);
-				return;
-			}
-			const canEat = checkEat(preRowCol, [row, col]);
-			if (canEat) {
-				unLight(preRowCol);
-				if (move(preRowCol, [row, col])) updatePieceInfo(preRowCol, [row, col]);
-				return;
-			}
-			const pieceInfo = givePieceInfo([row, col]);
-			const { type } = pieceInfo;
-			if (type === getTurn()) {
-				unLight(preRowCol);
-				light([row, col]);
-			}
-			return;
-		} else {
-			const pieceInfo = givePieceInfo([row, col]);
-			const { type } = pieceInfo;
-			if (type !== getTurn()) return;
-
-			light([row, col]);
-
-
-		}
+		runOnPieceClicked(previouslyClicked, [row, col]);
 	} else if (!contains) {
-		if (preRowCol === null) return;
-		unLight(preRowCol);
-		if (move(preRowCol, [row, col])) updatePieceInfo(preRowCol, [row, col]);
+		if (previouslyClicked === null) return;
+		unLight(previouslyClicked);
+		if (move(previouslyClicked, [row, col])) updatePieceInfo(previouslyClicked, [row, col]);
 	}
 };
 
@@ -101,16 +100,17 @@ const clickZone = function () {
 
 // client
 const piecePlacement = function () {
-	for (let i = 0; i < 8; i++) {
-		for (let j = 0; j < 8; j++) {
-			const pieceIn = givePieceInfo([i, j]);
-			const pieceName = pieceIn.name;
-			if (!pieceName) continue;
-			const pieceType = pieceIn.type;
-			piecePlace([i, j], pieceName, pieceType);
-		}
-	}
+	const placer = function ([row, col]) {
+		const pieceIn = givePieceInfo([row, col]);
+		const pieceName = pieceIn.name;
+		if (!pieceName) return;
+		const pieceType = pieceIn.type;
+		piecePlace([row, col], pieceName, pieceType);
+
+	};
+	nestLoop(placer)
 };
+
 
 
 // INIT function

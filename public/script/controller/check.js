@@ -1,4 +1,5 @@
 import { findKing, givePieceInfo, updatePieceInfo, updatePieceInfoCheck } from "../model/data.js";
+import { nestLoop } from "../utility.js";
 import { possibleMove, pawnEats } from "./movement.js";
 
 const getPieceMove = function ([row, col]) {
@@ -12,6 +13,7 @@ const getPieceMove = function ([row, col]) {
 const defendKing = function (dArr, canGo) {
 	const dArrFormatted = {};
 	const keys = Object.keys(dArr);
+
 	for (const key of keys) {
 		if (dArr[key][0] === undefined) continue;
 		if (typeof dArr[key][0] === "number") {
@@ -40,43 +42,38 @@ const defendKing = function (dArr, canGo) {
 
 const pinnedCheck = function (arrObj, type) {
 	const keys = Object.keys(arrObj);
-	for (let row = 0; row <= 7; row++) {
-		for (let col = 0; col <= 7; col++) {
-			const getPieceInfo = givePieceInfo([row, col]);
-			if (getPieceInfo.name === undefined) continue;
-			if (getPieceInfo.type === type) continue;
-
-
-			const pieceMoves = getPieceMove([row, col]);
-
-			const ke = Object.keys(pieceMoves);
-
-			// king's move
-			for (const key of keys) {
-				// when king can't move at this direction
-				if (arrObj[key][0] === undefined) continue;
-				const [kR, kC] = arrObj[key];
-				// other moves (loop over each direction)
-				for (const dir of ke) {
-					const data = pieceMoves[dir];
-					// if direction is long
-					if (data[0] === undefined) continue;
-					if (Array.isArray(data[0])) {
-						for (const [r, c] of data) {
-							if (r === kR && c === kC) arrObj[key] = [];
-						}
-						continue;
+	const pinnedChecker = function ([row, col]) {
+		const getPieceInfo = givePieceInfo([row, col]);
+		if (getPieceInfo.name === undefined) return;
+		if (getPieceInfo.type === type) return;
+		const pieceMoves = getPieceMove([row, col]);
+		const pieceMovekey = Object.keys(pieceMoves);
+		// king's move
+		for (const key of keys) {
+			// when king can't move at this direction
+			if (arrObj[key][0] === undefined) continue;
+			const [kR, kC] = arrObj[key];
+			// other moves (loop over each direction)
+			for (const dir of pieceMovekey) {
+				const data = pieceMoves[dir];
+				// if direction is long
+				if (data[0] === undefined) continue;
+				if (Array.isArray(data[0])) {
+					for (const [r, c] of data) {
+						if (r === kR && c === kC) arrObj[key] = [];
 					}
-					// if direction is just one step
-					if (typeof data[0] === "number") {
-						if (data[0] === kR && data[1] === kC) arrObj[key] = [];
-						continue;
-					}
-
+					continue;
 				}
+				// if direction is just one step
+				if (typeof data[0] === "number") {
+					if (data[0] === kR && data[1] === kC) arrObj[key] = [];
+					continue;
+				}
+
 			}
 		}
 	};
+	nestLoop(pinnedChecker)
 	return arrObj;
 };
 
