@@ -1,4 +1,3 @@
-import { board } from "./selects.js";
 import { appendEl, lightOff, lightOn, selectZone, addressify, blankHTML, createImgElement } from "../util/utility.js";
 import { IMAGE_DIRECTORY } from "../../env.js";
 

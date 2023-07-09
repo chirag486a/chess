@@ -3,7 +3,6 @@ import { addClass, createImgElement, addId, selectZone, appendEl, blankHTML, add
 // Selects
 import { board } from "../task/selects.js";
 // Env
-import { IMAGE_DIRECTORY } from "../../env.js";
 import { nestLoop } from "../../utility.js";
 
 

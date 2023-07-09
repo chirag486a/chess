@@ -1,7 +1,7 @@
 
 
 import { board } from "./selects.js";
-import { listen, retriveRowCol } from "../util/utility.js";
+import { retriveRowCol } from "../util/utility.js";
 
 const boardListener = function(handler){
   board.addEventListener("click", function (ev) {

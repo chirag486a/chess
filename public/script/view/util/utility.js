@@ -43,21 +43,12 @@ const lightOff = function (el, className) {
   el.closest(".item").classList.remove(className);
 };
 
-
-// Listener
-const listen = function (type = "click", el, func) {
-  el.addEventListener(type, function (ev) {
-    func(ev);
-  });
-};
-
 // util
 export {
   createImgElement,
   addClass,
   addId,
   selectZone,
-  listen,
   appendEl,
   retriveRowCol,
   addressify,

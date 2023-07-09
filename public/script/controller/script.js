@@ -4,7 +4,6 @@ import { givePieceInfo, updateRowCol, provideRowCol, deleteRowCol, updatePieceIn
 // view
 import { designBoard } from "../view/design/design.js";
 import { boardListener as listenToBoard } from "../view/task/handler.js";
-import { retriveRowCol } from "../view/util/utility.js";
 import { moveOnOffLight, clickLight, piecePlace } from "../view/task/task.js";
 // control/movement
 import { move, possibleMove } from "./movement.js";
