@@ -14,7 +14,7 @@ cd chess
 live-server
 ```
 
-> **Warning**  
+> **❗Note**  
 > This project is still a work in progress. Features and improvements are on the horizon!
 
 ### Making Chess Playable Online
